@@ -1,0 +1,42 @@
+---
+- hosts: local
+
+  pre_tasks:
+    - name: Ansible Insert multiple lines using blockinfile
+      replace:
+        path: ~/.ansible/roles/geerlingguy.nfs/defaults/main.yml
+        regexp: '(\s+)nfs_exports: \[\](\s+.*)?$'
+        replace: '\1nfs_exports: [ "/data/nfsroot/posters *(rw,sync,no_root_squash)" ]\2'
+        backup: yes
+
+    - name: Ansible Insert multiple lines using blockinfile
+      replace:
+        path: ~/.ansible/roles/geerlingguy.apache/defaults/main.yml
+        regexp: '(\s+)documentroot: "/var/www/html"(\s+.*)?$'
+        replace: '\1documentroot: "/data/nfsroot/posters"\2'
+        backup: yes
+
+  roles:
+    - { role: geerlingguy.nfs }
+    - { role: geerlingguy.apache }
+
+  post_tasks:
+    - name: Change the SELinux security context
+      command: chcon -R -t httpd_sys_content_t /data/nfsroot/posters/
+
+    - name: verify that an NFS share exists
+      command: showmount -e localhost
+
+    - name: Create mount point for local NFS share to test it
+      file:
+        path: /mnt/nfstest
+        state: directory
+
+    - name: Change the SELinux security context
+      command: mount localhost:/data/nfsroot/posters /mnt/nfstest
+
+    - name: download a sample image file to the NFS share
+      command: chdir=/mnt/nfstest wget https://img-aws.ehowcdn.com/240x360p/photos.demandstudios.com/getty/article/163/20/200329275-001_XS.jpg
+
+    - name: fetch that sample image file over http
+      command: chdir=/mnt/nfstest wget http://localhost/200329275-001_XS.jpg
