@@ -30,6 +30,11 @@
       wait_for:
         path: /data/nfsroot/posters/
 
+    - name: Restart service httpd, in all cases
+      service:
+        name: nfs
+        state: restarted
+
     - name: Change the SELinux security context
       command: chcon -R -t httpd_sys_content_t /data/nfsroot/posters/
 
