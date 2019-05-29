@@ -30,7 +30,7 @@
       wait_for:
         path: /data/nfsroot/posters/
 
-    - name: Restart service httpd, in all cases
+    - name: Restart service nfs, in all cases
       service:
         name: nfs
         state: restarted
