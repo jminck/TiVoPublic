@@ -7,3 +7,6 @@
 - CentOS/RHEL
 - Leverages Ansible (script will install it)
 - Needs internet access to install dependencies
+
+
+![overview](doc/posterserver-overview.png?raw=true "Overview")
