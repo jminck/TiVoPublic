@@ -2,14 +2,14 @@
 - hosts: local
 
   pre_tasks:
-    - name: Ansible Insert multiple lines using blockinfile
+    - name: Update export defaults for NFS
       replace:
         path: ~/.ansible/roles/geerlingguy.nfs/defaults/main.yml
         regexp: '(\s+)nfs_exports: \[\](\s+.*)?$'
         replace: '\1nfs_exports: [ "/data/nfsroot/posters *(rw,sync,no_root_squash)" ]\2'
         backup: yes
 
-    - name: Ansible Insert multiple lines using blockinfile
+    - name: Update docroot defaults for Apache
       replace:
         path: ~/.ansible/roles/geerlingguy.apache/defaults/main.yml
         regexp: '(\s+)documentroot: "/var/www/html"(\s+.*)?$'
