@@ -17,8 +17,9 @@
         backup: yes
 
   roles:
-    - { role: geerlingguy.nfs }
     - { role: geerlingguy.apache }
+    - { role: geerlingguy.nfs }
+
 
   post_tasks:
     - name: Change the SELinux security context
