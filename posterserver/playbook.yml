@@ -16,11 +16,20 @@
         replace: '\1documentroot: "/data/nfsroot/posters"\2'
         backup: yes
 
+    - name: Create folder for posters share
+      file:
+        path: /data/nfsroot/posters
+        state: directory
+
   roles:
     - { role: geerlingguy.apache }
     - { role: geerlingguy.nfs }
 
   post_tasks:
+    - name: Wait until the folder /data/nfsroot/posters/ is present before continuing
+      wait_for:
+        path: /data/nfsroot/posters/
+
     - name: Change the SELinux security context
       command: chcon -R -t httpd_sys_content_t /data/nfsroot/posters/
 
