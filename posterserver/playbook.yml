@@ -20,7 +20,6 @@
     - { role: geerlingguy.apache }
     - { role: geerlingguy.nfs }
 
-
   post_tasks:
     - name: Change the SELinux security context
       command: chcon -R -t httpd_sys_content_t /data/nfsroot/posters/
