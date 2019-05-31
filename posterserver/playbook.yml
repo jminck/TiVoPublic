@@ -5,8 +5,8 @@
     - name: Update export defaults for NFS
       replace:
         path: ~/.ansible/roles/geerlingguy.nfs/defaults/main.yml
-        regexp: '(\s+)nfs_exports: \[\](\s+.*)?$'
-        replace: '\1nfs_exports: [ "/data/nfsroot/posters *(rw,sync,no_root_squash)" ]\2'
+        regexp: '(\s+)\[\](\s+.*)?$'
+        replace: '\1[ "/data/nfsroot/posters *(rw,sync,no_root_squash)" ]\2'
         backup: yes
 
     - name: Update docroot defaults for Apache

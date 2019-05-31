@@ -1,3 +1,7 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR
+pwd
+
 #install ansible and playbooks
 sudo yum install epel-release -y
 sudo yum install facter -y
@@ -12,6 +16,14 @@ sudo bash -c "cat >> /etc/ansible/hosts" << EOL
 localhost ansible_connection=local
 EOL
 
+sudo bash -c "cat >> /etc/ansible/ansible.cfg" << EOL
+[defaults]
+log_path=/var/log/ansible.log
+EOL
+
 #run the playbook
-sudo ansible-playbook ./playbook.yml --connection=local
+sudo ansible-playbook ./playbook.yml --connection=local -vvvv
+#run it again because creating exports file fails the first time :\
+sudo ansible-playbook ./playbook.yml --connection=local -vvv
+
 
