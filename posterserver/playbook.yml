@@ -2,12 +2,10 @@
 - hosts: local
 
   pre_tasks:
-    - name: Update export defaults for NFS
-      replace:
-        path: ~/.ansible/roles/geerlingguy.nfs/defaults/main.yml
-        regexp: '(\s+)\[\](\s+.*)?$'
-        replace: '\1[ "/data/nfsroot/posters *(rw,sync,no_root_squash)" ]\2'
-        backup: yes
+    - name: add NFS share to j2 tempalte directly since updating via the j2 template isn't working
+      lineinfile:
+        path: ~/.ansible/roles/geerlingguy.nfs/templates/exports.j2
+        line: /data/nfsroot/posters *(rw,sync,no_root_squash)
 
     - name: Update docroot defaults for Apache
       replace:
@@ -46,8 +44,8 @@
         path: /mnt/nfstest
         state: directory
 
-    - name: Change the SELinux security context
-      command: mount localhost:/data/nfsroot/posters /mnt/nfstest
+    - name: set mountpoints
+      mount: name=/mnt/nfstest src=localhost:/data/nfsroot/posters fstype=nfs opts=rw dump=0 passno=0 state=mounted
 
     - name: download a sample image file to the NFS share
       command: chdir=/mnt/nfstest wget https://img-aws.ehowcdn.com/240x360p/photos.demandstudios.com/getty/article/163/20/200329275-001_XS.jpg

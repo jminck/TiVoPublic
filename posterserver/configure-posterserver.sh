@@ -23,7 +23,7 @@ EOL
 
 #run the playbook
 sudo ansible-playbook ./playbook.yml --connection=local -vvvv
-#run it again because creating exports file fails the first time :\
-sudo ansible-playbook ./playbook.yml --connection=local -vvv
+#run it again because creating config files from templates fails the first time :\
+sudo ansible-playbook ./playbook.yml --connection=local -vvvv
 
 
