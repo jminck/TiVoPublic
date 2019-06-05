@@ -13,7 +13,7 @@
 # set required variables
 $adifiles = dir -Recurse /assets/arm2/*.xml
 $logFile = "./preprocessor_" + (get-date -Format yyyy-MM-dd) + ".log"
-[xml]$packages = Get-Content "/assets/TDS-ADI/wfm-preprpocessor/packages.xml"
+[xml]$packages = Get-Content "./packages.xml"
 
 # process ADI files
 foreach ($adifile in $adifiles) {
