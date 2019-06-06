@@ -163,16 +163,25 @@ function Add-SvodPackage {
                 Write-Log -Message "Provider_Content_Tier=$pctierval" -logFile $logFile
             }
             $packagetier = $packages.SelectNodes("//Package[text()='$pctierval']").ParentNode.ParentNode.Name
+            # we didn't find a match for the SVOD offer, add a default value
+            if ($null -eq $packagetier) {$packagetier = "NOTFOUND"}
             # check for existing Package_offder_ID node
             $pkg = $xml.SelectNodes("//App_Data") | where-object { $_.Name -match "Package_offer_ID" }
             
-            if (($pkg.count -eq 0) -and ($null -ne $pctier)) { # add a new offer element
+            if (($pkg.count -eq 0 -and $null -ne $pctier)) { # add a new offer element
                 Write-Log -Message "adding new node Package_offer_ID=$packagetier" -logFile $logFile
                 [xml]$childnode = "<App_Data App='MOD' Name='Package_offer_ID' Value='" + $packagetier + "'/>"
                 $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true)) 
             }
             elseif ($pkg.count -eq 1 -And $null -ne $packagetier) { # update existing offer element from package lookup
                 $oldpackagetier = $pkg.value
+                Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
+                $pkg.value = $packagetier
+                Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
+            }
+            elseif ($pkg.count -eq 1 -And $null -eq $packagetier) { # update existing offer element from package lookup
+                $oldpackagetier = $pkg.value
+                Write-Log -Message "old package tier was null" -logFile $logFile
                 Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
                 $pkg.value = $packagetier
                 Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
@@ -233,7 +242,7 @@ function Rename-AssetAndFolder {
         Rename-Item -Path $adifile.DirectoryName -NewName $newFolderName
         Write-Log -Message "New ADI filename is $newFileName" -logFile $logFile
         $newfolder = (get-childitem ((Split-path -parent $adifile.directoryname)) -Directory -Filter $newFolderName)
-        Write-Log -Message "New ADI folder is $newfolder.FullName" -logFile $logFile
+        Write-Log -Message "New ADI folder is $newfolder" -logFile $logFile
         return $newfolder 
     }
 } #End function
@@ -270,21 +279,20 @@ function Add-WfmReadyFile {
         [System.IO.DirectoryInfo]$folder
     )
     PROCESS {
-        touch $folder/my.mpg
         $files = Get-ChildItem $folder
         $adifile = Get-ChildItem $folder -Filter *.xml
         $recentFileWrite = $false
         foreach ($file in $files) {
-            {
-                        
+                Write-host $File.name $file.LastWriteTime  
+                Write-Host File is -($file.LastWriteTime - (Get-Date)) minutes old
                 if ($file.LastWriteTime -ge (Get-Date).AddMinutes(-15)) {
                     if ($file.Name -ne $adifile.Name) {
                         #flag that file timestamps are too new to mark folder with .wfmready 
                         $recentFileWrite = $true
-                        Write-Log -Message "$file.name last write minutes ago: ($file.LastWriteTime - (Get-Date)).Minutes" -logFile $logFile
+                        $timediff = ((Get-Date) - $file.LastWriteTime).TotalMinutes
+                        Write-Log -Message "$file last write minutes ago: $timediff " -logFile $logFile
+                        Write-host ""
                     }
-                }
-
             }
         }
 
@@ -292,5 +300,58 @@ function Add-WfmReadyFile {
             Write-Log -Message "no new files, tagging folder with .wfmready file" -logFile $logFile
             new-item ($adifile.DirectoryName.tostring() + "/" + $adifile.BaseName + ".wfmready") -type file
         }
+    }
+} #End function
+
+
+function Skip-CurrentlyCopyingAssets {
+    <#
+        .Synopsis
+          The short function description.
+        .Description
+            The long function description
+        .Example
+            C:\PS>Function-Name -param "Param Value"
+            
+            This example does something
+        .Example
+            C:\PS>
+            
+            You can have multiple examples
+        .Notes
+            Name: Function-Name
+            Author: Author Name
+            Last Edit: Date
+            Keywords: Any keywords
+        .Inputs
+            $folder - folder to check for files with recent timestamps (currently copying files)
+        .Outputs
+            [bool]$recentFileWrite
+        #Requires -Version 2.0
+        #>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    Param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter folder to check for recently modified files")]
+        [System.IO.DirectoryInfo]$folder
+    )
+    PROCESS {
+        $files = Get-ChildItem $folder
+        [bool]$recentFileWrite = $false
+        $delay = -1
+        foreach ($file in $files) {
+                if ($file.LastWriteTime -ge (Get-Date).AddMinutes($delay)) {
+                    if ($file.Name -ne $adifile.Name) {
+                        #flag that file timestamps are too new to mark folder with .wfmready 
+                        $recentFileWrite = $true
+                        Write-Log -Message "$file.name last write minutes ago: (Get-Time - $file.LastWriteTime).TotalMinutes - minimum delay is $delay" -logFile $logFile
+                    }
+                }
+            }
+
+        if ($recentFileWrite -eq $false) {
+            Write-Log -Message "Folder doesn't appear to be currently copying files" -logFile $logFile
+        }
+        return $recentFileWrite
     }
 } #End function

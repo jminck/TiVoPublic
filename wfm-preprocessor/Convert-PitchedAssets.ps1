@@ -11,7 +11,7 @@
 . ./PreprocessorFunctions.ps1
 
 # set required variables
-$adifiles = dir -Recurse /assets/arm2/*.xml
+$adifiles = dir -Recurse /assets/wfmtest/catcher/*.xml
 $logFile = "./preprocessor_" + (get-date -Format yyyy-MM-dd) + ".log"
 [xml]$packages = Get-Content "./packages.xml"
 
@@ -21,16 +21,20 @@ foreach ($adifile in $adifiles) {
         Write-host $adifile.DirectoryName already processed
     }
     else {
-        Write-Log -Message "processing $adifile" -logFile $logFile
-        $xml = [xml](Get-Content $adifile)
-        # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
-        $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value 
-        $netprice = $grossprice 
-        Add-GrossNetPrice -xml $xml -grossprice $grossprice -netprice $netprice
-        Add-SvodPackage -xml $xml -grossprice $grossprice -packages $packages
-        $newFolder = Rename-AssetAndFolder -xml $xml -adifile $adifile
-        Add-WfmReadyFile -folder $newFolder
-        write-host done
-        Write-Log -Message "--- finished processing $adifile" -logFile $logFile
+        $skip = (Skip-CurrentlyCopyingAssets -folder $adifile.DirectoryName )
+        if (!($skip[$skip.count-1]))
+        {
+            Write-Log -Message "processing $adifile" -logFile $logFile
+            $xml = [xml](Get-Content $adifile)
+            # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
+            $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value 
+            $netprice = $grossprice 
+            Add-GrossNetPrice -xml $xml -grossprice $grossprice -netprice $netprice
+            Add-SvodPackage -xml $xml -grossprice $grossprice -packages $packages
+            $newFolder = Rename-AssetAndFolder -xml $xml -adifile $adifile
+            Add-WfmReadyFile -folder $newFolder
+            write-host done
+            Write-Log -Message "--- finished processing $adifile" -logFile $logFile
+        }
     }
 }
