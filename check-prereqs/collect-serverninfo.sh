@@ -11,9 +11,9 @@ echo -----------------------------------------------------------------
 facter -j
 echo
 echo -----------------------------------------------------------------
-echo collecting info from systemctl
+echo collecting info from service --status-all
 echo -----------------------------------------------------------------
-systemctl list-units --type service --all --no-page
+service --status-all
 echo
 echo -----------------------------------------------------------------
 echo collecting routes

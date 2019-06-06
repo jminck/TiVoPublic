@@ -164,7 +164,10 @@ function Add-SvodPackage {
             }
             $packagetier = $packages.SelectNodes("//Package[text()='$pctierval']").ParentNode.ParentNode.Name
             # we didn't find a match for the SVOD offer, add a default value
-            if ($null -eq $packagetier) {$packagetier = "NOTFOUND"}
+            if ($null -eq $packagetier) {
+                $packagetier = "NOTFOUND"
+                Write-Log -Message "Did not find a match for $pctierval - update Packages.xml with tier information" -logFile $logFile -Severity Warning
+            }
             # check for existing Package_offder_ID node
             $pkg = $xml.SelectNodes("//App_Data") | where-object { $_.Name -match "Package_offer_ID" }
             
@@ -281,15 +284,16 @@ function Add-WfmReadyFile {
     PROCESS {
         $files = Get-ChildItem $folder
         $adifile = Get-ChildItem $folder -Filter *.xml
+        $delay = -5
         $recentFileWrite = $false
         foreach ($file in $files) {
                 Write-host $File.name $file.LastWriteTime  
                 Write-Host File is -($file.LastWriteTime - (Get-Date)) minutes old
-                if ($file.LastWriteTime -ge (Get-Date).AddMinutes(-15)) {
+                if ($file.LastWriteTime -ge (Get-Date).AddMinutes($delay)) {
                     if ($file.Name -ne $adifile.Name) {
                         #flag that file timestamps are too new to mark folder with .wfmready 
                         $recentFileWrite = $true
-                        $timediff = ((Get-Date) - $file.LastWriteTime).TotalMinutes
+                        $timediff = ((Get-Date) - $file.LastWriteTime).TotalMinutes | % {$_.ToString("#.#")}
                         Write-Log -Message "$file last write minutes ago: $timediff " -logFile $logFile
                         Write-host ""
                     }
@@ -304,7 +308,7 @@ function Add-WfmReadyFile {
 } #End function
 
 
-function Skip-CurrentlyCopyingAssets {
+function Skip-CurrentTransfers {
     <#
         .Synopsis
           The short function description.
@@ -344,7 +348,9 @@ function Skip-CurrentlyCopyingAssets {
                     if ($file.Name -ne $adifile.Name) {
                         #flag that file timestamps are too new to mark folder with .wfmready 
                         $recentFileWrite = $true
-                        Write-Log -Message "$file.name last write minutes ago: (Get-Time - $file.LastWriteTime).TotalMinutes - minimum delay is $delay" -logFile $logFile
+                        $timediff = ((Get-Date) - $file.LastWriteTime).TotalMinutes | % {$_.ToString("#.#")}
+                        Write-Log -Message "Skip-CurrentTransfer - $file last write minutes ago: $timediff " -logFile $logFile
+                        Write-host ""
                     }
                 }
             }

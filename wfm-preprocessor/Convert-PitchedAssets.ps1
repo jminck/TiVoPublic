@@ -21,7 +21,7 @@ foreach ($adifile in $adifiles) {
         Write-host $adifile.DirectoryName already processed
     }
     else {
-        $skip = (Skip-CurrentlyCopyingAssets -folder $adifile.DirectoryName )
+        $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName )
         if (!($skip[$skip.count-1]))
         {
             Write-Log -Message "processing $adifile" -logFile $logFile
