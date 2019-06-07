@@ -84,3 +84,8 @@ echo -----------------------------------------------------------------
 echo collecting users who can login to the system
 echo -----------------------------------------------------------------
 getent passwd | egrep -v '/s?bin/(nologin|shutdown|sync|halt)' | cut -d: -f1
+echo
+echo -----------------------------------------------------------------
+echo collecting iptables information
+echo -----------------------------------------------------------------
+iptables -L -v
