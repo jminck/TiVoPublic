@@ -1,7 +1,14 @@
 #!/bin/bash
-
 echo -----------------------------------------------------------------
 echo collect-serverinfo.sh version 1.0.06-06-2019
+echo checking if we have sufficient permissisions to run the script
+echo -----------------------------------------------------------------
+id
+if [[ $EUID -ne 0 ]]; then
+   echo "*** This script must be run as root, quitting ***" 
+   exit 1
+fi
+echo -----------------------------------------------------------------
 echo Detecting OS Distro and version
 echo -----------------------------------------------------------------
 DISTRO="$(cat /etc/system-release | grep -o '^\w\+ ')"
@@ -21,6 +28,7 @@ echo -----------------------------------------------------------------
 yum install wget -y
 wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 rpm -ivh epel-release-6-8.noarch.rpm
+sed -i "s/mirrorlist=https/mirrorlist=http/" /etc/yum.repos.d/epel.repo
 fi
 
 if (( $(echo "$VER 7" | awk '{print ($1 > $2)}') && $(echo "$VER 8" | awk '{print ($1 < $2)}') )); then
