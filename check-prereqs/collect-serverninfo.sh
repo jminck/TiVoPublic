@@ -52,7 +52,7 @@ echo
 fi
 if [ $centos6 ] ; then
 echo -----------------------------------------------------------------
-echo collecting info from systemctl
+echo collecting info from service --status-all
 echo -----------------------------------------------------------------
 service --status-all
 echo
