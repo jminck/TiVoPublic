@@ -18,8 +18,12 @@ echo Version = $VER
 echo -----------------------------------------------------------------
 echo Verify this is a supported distro and version
 echo -----------------------------------------------------------------
-[[ `echo $DISTRO` == "CentOS" ]] || (echo "Unexpected distro $DISTRO doesn't match CentOS, quitting"; exit)
-
+if [[ `echo $DISTRO` == "CentOS" ]]; then
+   echo "$DISTRO is ok, continuing"
+else
+   echo "Unexpected distro $DISTRO doesn't match CentOS, quitting"
+   exit 1
+fi
 if (( $(echo "$VER 6" | awk '{print ($1 > $2)}') && $(echo "$VER 7" | awk '{print ($1 < $2)}') )); then
 centos6=true
 echo -----------------------------------------------------------------
