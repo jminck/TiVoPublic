@@ -43,14 +43,14 @@ echo collecting info from facter
 echo -----------------------------------------------------------------
 facter
 echo
-if [ $centos6 ] ; then
+if [ $centos7 ] ; then
 echo -----------------------------------------------------------------
 echo collecting info from systemctl list-units --type service --all --no-page
 echo -----------------------------------------------------------------
 systemctl list-units --type service --all --no-page
 echo
 fi
-if [ $centos7 ] ; then
+if [ $centos6 ] ; then
 echo -----------------------------------------------------------------
 echo collecting info from systemctl
 echo -----------------------------------------------------------------
