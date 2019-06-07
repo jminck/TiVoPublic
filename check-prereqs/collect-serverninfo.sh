@@ -93,3 +93,10 @@ echo -----------------------------------------------------------------
 echo collecting iptables information
 echo -----------------------------------------------------------------
 iptables -L -v
+echo
+echo -----------------------------------------------------------------
+echo collecting name resolution information
+echo -----------------------------------------------------------------
+host wwww.google.com
+cat /etc/resolv.conf
+echo
