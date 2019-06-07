@@ -162,7 +162,7 @@ function Add-SvodPackage {
                 $pctierval = $pctier.value
                 Write-Log -Message "Provider_Content_Tier=$pctierval" -logFile $logFile
             }
-            $packagetier = $packages.SelectNodes("//Package[text()='$pctierval']").ParentNode.ParentNode.Name
+            $packagetier = $packages.SelectNodes("//Provider_Content_Tier[text()='$pctierval']").ParentNode.ParentNode.Name
             # we didn't find a match for the SVOD offer, add a default value
             if ($null -eq $packagetier) {
                 $packagetier = "NOTFOUND"
