@@ -38,7 +38,7 @@ $catcher = "/assets/wfmtest/catcher"
 ##### Execute Convert-PitchedAssets.ps1
 Execute Convert-PitchedAssets.ps1 in a PowerShell command prompt to process the ADI folder structure
 ```sh
-PS /wfm-preprocessor> ./Build-PackagesFromADIFiles.ps1
+PS /wfm-preprocessor> ./Convert-PitchedAssets.ps1
 ```
 The process will perform the folllowing actions:
 * Check if a .wfmready file already exists in the folder, and if so, do not process the folder, its already been processed
