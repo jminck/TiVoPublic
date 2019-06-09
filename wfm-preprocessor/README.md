@@ -33,31 +33,19 @@ The script will produce an XML file with a schema like below. After the skeleton
   
   
 
-<Assets>
-
-<Provider_Content_Tier>
-
-<Tier>
-
-<Name>basic</Name>
-
-<Providers>
-
-<Provider>ABC</Provider>
-
-</Providers>
-
-<Provider_Content_Tiers>
-
-<Provider_Content_Tier>ADULTSWIM_15</Provider_Content_Tier>
-
-</Provider_Content_Tiers>
-
-</Tier>
-
-</Provider_Content_Tier>
-
-</Assets>
+        <Assets>
+          <Provider_Content_Tier>
+            <Tier>
+              <Name>basic</Name>
+              <Providers>
+                <Provider>ABC</Provider>
+              </Providers>
+              <Provider_Content_Tiers>
+                <Provider_Content_Tier>ADULTSWIM_15</Provider_Content_Tier>
+              </Provider_Content_Tiers>
+            </Tier>
+          </Provider_Content_Tier>
+        </Assets>
 
   
 
