@@ -5,21 +5,20 @@
     .DESCRIPTION
         This script will recurse through a path looking for *.xml, extract prodiver names and Provider_Content_Tier
         elements from the fils, and build a packages.xml file
-
+        
         <Assets>
-        <Provider_Content_Tier>
+          <Provider_Content_Tier>
             <Tier>
-            <Name>basic</Name>
-            <Providers>
+              <Name>basic</Name>
+              <Providers>
                 <Provider>ABC</Provider>
-            </Providers>
-            <Provider_Content_Tiers>
+              </Providers>
+              <Provider_Content_Tiers>
                 <Provider_Content_Tier>ADULTSWIM_15</Provider_Content_Tier>
-            </Provider_Content_Tiers>
+              </Provider_Content_Tiers>
             </Tier>
-        </Provider_Content_Tier>
+          </Provider_Content_Tier>
         </Assets>
-
 
 #>
 
