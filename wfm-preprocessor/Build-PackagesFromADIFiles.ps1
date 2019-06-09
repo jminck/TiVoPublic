@@ -26,7 +26,7 @@
 . ./PreprocessorFunctions.ps1
 
 $logFile = "./packages-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$outputPath = "./packages.xml"
+$outputPath = "./packages-tds.xml"
 $providers = @()
 $tiers = @()
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
@@ -52,6 +52,7 @@ foreach ($adifile in $adifiles) {
   if ($counter -ge $step) {
     Write-Progress -Activity "Search in Progress" -Status "$i% Complete:" -PercentComplete $i;
     $counter = 0
+    Write-Host Percentage complete: $i
     $i++
   }
 }

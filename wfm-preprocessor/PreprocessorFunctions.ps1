@@ -396,3 +396,51 @@ function Skip-CurrentTransfers {
     }
   }
 } #End function
+
+
+function Get-XMLFileCount {
+  <#
+          .Synopsis
+            The short function description.
+          .Description
+              The long function description
+          .Example
+              C:\PS>Function-Name -param "Param Value"
+              
+              This example does something
+          .Example
+              C:\PS>
+              
+              You can have multiple examples
+          .Notes
+              Name: Function-Name
+              Author: Author Name
+              Last Edit: Date
+              Keywords: Any keywords
+          .Inputs
+              $folder - folder to check for files with recent timestamps (currently copying files)
+          .Outputs
+              [bool]$recentFileWrite
+          #Requires -Version 2.0
+          #>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+      [Parameter(Mandatory = $true,HelpMessage = "Enter folder to check XML file count")]
+      [System.IO.DirectoryInfo]$folder
+    )
+    process {
+      try {
+        $files = Get-ChildItem $folder -Filter *.xml
+        if ($files.count -gt 1)
+        {
+           Write-Log -Message "$folder.FullName contains multiple XML files: $files" -logFile $logFile -Severity "Warning"}
+      }
+       catch
+      {
+        Write-Host $_.Exception.Message -ForegroundColor Yellow
+        Write-Log -Message $_.Exception.Message -Severity "Error"
+      }
+    }
+  } #End function
+  

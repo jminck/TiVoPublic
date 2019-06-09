@@ -11,7 +11,7 @@ fi
 echo -----------------------------------------------------------------
 echo Detecting OS Distro and version
 echo -----------------------------------------------------------------
-DISTRO="$(cat /etc/system-release | grep -o '^[^0-9]*')"
+DISTRO="$(cat /etc/system-release | grep -o '^[^0-9]*' | sed 's/^[ \t]*//;s/[ \t]*$//')"
 VER="$(cat /etc/system-release | grep -o ' [0-9].[0-9]\+')"
 echo Distro = $DISTRO
 echo Version = $VER
@@ -100,6 +100,8 @@ echo collecting name resolution information
 echo -----------------------------------------------------------------
 echo running command: ping -c 2 tivo.com
 ping -c 2 tivo.com
+echo
+echo -----
 echo running command: cat /etc/resolv.conf
 cat /etc/resolv.conf
 echo

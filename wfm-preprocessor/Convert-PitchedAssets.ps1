@@ -13,7 +13,7 @@
 # set required variables
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
-[xml]$packages = Get-Content "./packages.xml"
+[xml]$packages = Get-Content "./packages2.xml"
 
 # process ADI files
 foreach ($adifile in $adifiles) {
@@ -25,6 +25,8 @@ foreach ($adifile in $adifiles) {
     if (!($skip[$skip.count - 1]))
     {
       Write-Log -Message "processing $adifile" -logFile $logFile
+      # see if there are multiple XML files in the folder and log if so, we only expect one
+      Get-XMLFileCount $adifile.Directory.FullName
       $xml = [xml](Get-Content $adifile)
       # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
       $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
