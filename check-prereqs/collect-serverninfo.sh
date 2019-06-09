@@ -20,6 +20,8 @@ echo Verify this is a supported distro and version
 echo -----------------------------------------------------------------
 if [[ `echo $DISTRO` == *"CentOS"* ]]; then
    echo "$DISTRO is ok, continuing"
+elif [[ `echo $DISTRO` == *"Red Hat"* ]]; then
+   echo "$DISTRO is unexpected, continuing anyway"
 else
    echo "Unexpected distro $DISTRO doesn't match CentOS, quitting"
    exit 1
