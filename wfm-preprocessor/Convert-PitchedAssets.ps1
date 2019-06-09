@@ -11,11 +11,12 @@
 . ./PreprocessorFunctions.ps1
 
 # set required variables
-$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
+$catcher = "/assets/wfmtest/catcher"
+[xml]$packages = Get-Content "./packages.xml"
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
-[xml]$packages = Get-Content "./packages2.xml"
 
 # process ADI files
+$adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
 foreach ($adifile in $adifiles) {
   if ((Get-ChildItem $adifile.DirectoryName -Name *.wfmready).count -gt 0) { # skip folders already containing a .wfmready file
     Write-Host $adifile.DirectoryName already processed
