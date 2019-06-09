@@ -26,7 +26,7 @@
 . ./PreprocessorFunctions.ps1
 
 $logFile = "./packages-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$outputPath = "./packages-tds.xml"
+$outputPath = "./packages.xml"
 $providers = @()
 $tiers = @()
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
