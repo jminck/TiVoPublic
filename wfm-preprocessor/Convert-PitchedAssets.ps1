@@ -11,30 +11,30 @@
 . ./PreprocessorFunctions.ps1
 
 # set required variables
-$adifiles = dir -Recurse /assets/wfmtest/catcher/*.xml
-$logFile = "./preprocessor_" + (get-date -Format yyyy-MM-dd) + ".log"
+$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
+$logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
 [xml]$packages = Get-Content "./packages.xml"
 
 # process ADI files
 foreach ($adifile in $adifiles) {
-    if ((get-ChildItem  $adifile.DirectoryName -Name *.wfmready).count -gt 0) { # skip folders already containing a .wfmready file
-        Write-host $adifile.DirectoryName already processed
+  if ((Get-ChildItem $adifile.DirectoryName -Name *.wfmready).count -gt 0) { # skip folders already containing a .wfmready file
+    Write-Host $adifile.DirectoryName already processed
+  }
+  else {
+    $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName)
+    if (!($skip[$skip.count - 1]))
+    {
+      Write-Log -Message "processing $adifile" -logFile $logFile
+      $xml = [xml](Get-Content $adifile)
+      # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
+      $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
+      $netprice = $grossprice
+      Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
+      Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages
+      $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
+      Add-WfmReadyFile -folder $newFolder
+      Write-Host done
+      Write-Log -Message "--- finished processing $adifile" -logFile $logFile
     }
-    else {
-        $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName )
-        if (!($skip[$skip.count-1]))
-        {
-            Write-Log -Message "processing $adifile" -logFile $logFile
-            $xml = [xml](Get-Content $adifile)
-            # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
-            $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value 
-            $netprice = $grossprice 
-            Add-GrossNetPrice -xml $xml -grossprice $grossprice -netprice $netprice
-            Add-SvodPackage -xml $xml -grossprice $grossprice -packages $packages
-            $newFolder = Rename-AssetAndFolder -xml $xml -adifile $adifile
-            Add-WfmReadyFile -folder $newFolder
-            write-host done
-            Write-Log -Message "--- finished processing $adifile" -logFile $logFile
-        }
-    }
+  }
 }
