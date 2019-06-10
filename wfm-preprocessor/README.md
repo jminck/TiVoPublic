@@ -8,7 +8,12 @@ wfm-preprocessor adds required TiVo VOD extension fields to ADI files, and adds 
 
 ### Preparation
 
-  
+This script uses the Provider_Content_Tier element of the ADI file by default as the lookup to determine the SVOD packaage the asset belongs to, if any, for example:
+
+  <App_Data App="MOD" Name="__Provider_Content_Tier__" Value="__ADULTSWIM_15__" />
+
+The lookup table of Provider_Content_Tier values to SVOD packages is stored in an XML file called packages.xml
+This file needs to be created and maintained by the VOD ingestion operations team. To seed the initial creation of this file, the script Build-PackagesFromADIFiles.ps1 can build an initial XML skeleton and extract the list of Provider_Content_Tier values that exist in existing asset ADI library.
 
 ##### Set variables in Build-PackagesFromADIFiles.ps1
 
@@ -28,7 +33,7 @@ PS /wfm-preprocessor> ./Build-PackagesFromADIFiles.ps1
 
 ```
 
-The script will produce an XML file with a schema like below. After the skeleton is produced, manually edit the resulting file and define tiers based on your desired SVOD package names, and associated Providers/Content tiers. The Tier name will be the Package_offer_ID field added to the ADI metadata.
+The script will produce an XML file with a schema like below. After the skeleton is produced, manually __edit the resulting file and define tiers based on your desired SVOD package names, and associated Providers/Content tiers__. The Tier name will be the Package_offer_ID field added to the ADI metadata.
 
   
   
@@ -77,13 +82,16 @@ The process will perform the folllowing actions:
 
 * Create Package_offer_ID field if:
 
-* Gross_price and Net_price are set to 0
+  * Gross_price and Net_price are set to 0 
+AND
+  * A matching Provider_Content_Tier or Provider was found in packages.xml (depending on which was the lookup element specified in the script in the $packageNode variable)
 
-* If a matching Provider_Content_Tier was found in packages.xml it is used as value of the field, otherwise the field is set to NOTFOUND.
-
-* Rename the asset folder as <assetID>_<timestamp> per wfm requirements.
+* Rename the asset folder as [assetID]_[timestamp] per wfm requirements.
 
 * Check the last modified timestamp of assets in the folder, and if older than x minutes, mark the asset is ready for wfm ingestion by adding a <xml>.wfmready file to the folder, where <xml> is the base file name of the ADI xml file. If last modified time of any asset files is less than n minutes, assume the asset is still being transfered to the catcher and don't mark the folder as ready to ingest
+
+### Running the script on a schedule
+This script can be run on a schedule (suggested interval every 30 minutes)
 
 ### Running in Linux
 Install PowerShell for Linux (tested on PowerShell 7 preview 1 on RHEL 7.6)
