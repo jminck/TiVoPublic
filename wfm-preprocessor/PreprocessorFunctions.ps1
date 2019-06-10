@@ -183,41 +183,42 @@ function Add-SvodPackage {
           Write-Log -Message "$packagenode=$pctierval" -logFile $logFile
         }
         $packagetier = $packages.SelectNodes("//$packagenode[text()='$pctierval']").ParentNode.ParentNode.Name
-        # we didn't find a match for the SVOD offer, add a default value
+        # we didn't find a match for the SVOD offer
         if ($null -eq $packagetier) {
-          $packagetier = "NOTFOUND"
-          Write-Log -Message "Did not find a match for $pctierval - update Packages.xml with tier information" -logFile $logFile -Severity Warning
-        }
-        # check for existing Package_offder_ID node
-        $pkg = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Package_offer_ID" }
+              $packagetier = "NOTFOUND"
+              Write-Log -Message "Did not find a match for $pctierval - update Packages.xml with tier information if this asset should be associated with an SVOD package" -logFile $logFile -Severity Warning
+            } else {
+            # check for existing Package_offder_ID node
+            $pkg = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Package_offer_ID" }
 
-        if (($pkg.count -eq 0 -and $null -ne $pctier)) { # add a new offer element
-          Write-Log -Message "adding new node Package_offer_ID=$packagetier" -logFile $logFile
-          [xml]$childnode = "<App_Data App='MOD' Name='Package_offer_ID' Value='" + $packagetier + "'/>"
-          $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data,$true))
-        }
-        elseif ($pkg.count -eq 1 -and $null -ne $packagetier) { # update existing offer element from package lookup
-          $oldpackagetier = $pkg.value
-          Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
-          $pkg.value = $packagetier
-          Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
-        }
-        elseif ($pkg.count -eq 1 -and $null -eq $packagetier) { # update existing offer element from package lookup
-          $oldpackagetier = $pkg.value
-          Write-Log -Message "old package tier was null" -logFile $logFile
-          Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
-          $pkg.value = $packagetier
-          Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
-        }
-        else {
-          $msg = "Add-SvodPackage - skipping"
-          $msg += "`r`nProvider_Content_Tier=$pctierval"
-          $msg += "`r`npackagetier=$packagetier"
-          $msg += "`r`grossprice=$grossprice"
-          $msg += "`r`Package_offer_ID=" + $pkg.value
-          Write-Host $msg
-          Write-Log -Message $msg -logFile $logFile
-        }
+            if (($pkg.count -eq 0 -and $null -ne $pctier)) { # add a new offer element
+              Write-Log -Message "adding new node Package_offer_ID=$packagetier" -logFile $logFile
+              [xml]$childnode = "<App_Data App='MOD' Name='Package_offer_ID' Value='" + $packagetier + "'/>"
+              $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data,$true))
+            }
+            elseif ($pkg.count -eq 1 -and $null -ne $packagetier) { # update existing offer element from package lookup
+              $oldpackagetier = $pkg.value
+              Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
+              $pkg.value = $packagetier
+              Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
+            }
+            elseif ($pkg.count -eq 1 -and $null -eq $packagetier) { # update existing offer element from package lookup
+              $oldpackagetier = $pkg.value
+              Write-Log -Message "old package tier was null" -logFile $logFile
+              Write-Log -Message "old Package_offer_ID=$oldpackagetier" -logFile $logFile
+              $pkg.value = $packagetier
+              Write-Log -Message "new Package_offer_ID=$packagetier" -logFile $logFile
+            }
+            else {
+              $msg = "Add-SvodPackage - skipping"
+              $msg += "`r`nProvider_Content_Tier=$pctierval"
+              $msg += "`r`npackagetier=$packagetier"
+              $msg += "`r`grossprice=$grossprice"
+              $msg += "`r`Package_offer_ID=" + $pkg.value
+              Write-Host $msg
+              Write-Log -Message $msg -logFile $logFile
+            }        
+          }
       }
     }
     catch
