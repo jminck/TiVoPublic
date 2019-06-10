@@ -150,6 +150,9 @@ function Add-SvodPackage {
     [Parameter(Mandatory = $true,HelpMessage = "Enter packages xml object")]
     [System.Xml.XmlDocument]$packages,
 
+    [Parameter(Mandatory = $true,HelpMessage = "Enter package XML node to use for lookup")]
+    [string]$packagenode,
+
     [Parameter(Mandatory = $true)]
     [string]$grossprice
   )
@@ -158,19 +161,28 @@ function Add-SvodPackage {
       if ($grossprice -lt 0.001) {
         # only assets with price of 0 can be SVOD
         # get existing tier information
-        $pctier = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Provider_Content_Tier" }
+        if ($packagenode -eq "Provider_Content_Tier")
+        {
+        $pctier = ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match $packagenode }).Value
+        } elseif ($packagenode -eq "Provider") {
+          $pctier = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider  
+        } else {
+          ThrowError -ExceptionName "InvalidPackageNode" -ExceptionMessage "packagenode $packagenode was not found in packages.xml"
+        }
+        
+        Write-Log -Message "Using $packagenode as package.xml lookup node" -logFile $logFile
         if ($pctier.count -gt 1) {
-          Write-Log -Message "Multiple Provider_Content_Tier nodes detected - " -logFile $logFile
-          foreach ($tier in $pctier) { $tierlist += $tier.value + "`r`n" }
+          Write-Log -Message "Multiple $packagenode nodes detected - " -logFile $logFile
+          foreach ($tier in $pctier) { $tierlist += $tier + "`r`n" }
           Write-Log -Message $tierlist -logFile $logFile
-          $pctierval = $pctier[0].value # if ADI has more than one Content tiers, pick first one until we figure out better logic
-          Write-Log -Message "Provider_Content_Tier chosen for matching - $pctierval" -logFile $logFile
+          $pctierval = $pctier[0] # if ADI has more than one Content tiers, pick first one until we figure out better logic
+          Write-Log -Message "$packagenode chosen for matching - $pctierval" -logFile $logFile
         }
         else {
-          $pctierval = $pctier.value
-          Write-Log -Message "Provider_Content_Tier=$pctierval" -logFile $logFile
+          $pctierval = $pctier
+          Write-Log -Message "$packagenode=$pctierval" -logFile $logFile
         }
-        $packagetier = $packages.SelectNodes("//Provider_Content_Tier[text()='$pctierval']").ParentNode.ParentNode.Name
+        $packagetier = $packages.SelectNodes("//$packagenode[text()='$pctierval']").ParentNode.ParentNode.Name
         # we didn't find a match for the SVOD offer, add a default value
         if ($null -eq $packagetier) {
           $packagetier = "NOTFOUND"

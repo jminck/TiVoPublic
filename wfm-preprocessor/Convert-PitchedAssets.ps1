@@ -12,8 +12,10 @@
 
 # set required variables
 $catcher = "/assets/wfmtest/catcher"
-[xml]$packages = Get-Content "./packages.xml"
+[xml]$packages = Get-Content "./packages2.xml"
+$packageNode = "Provider_Content_Tier" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
+
 
 # process ADI files
 $adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
@@ -33,7 +35,7 @@ foreach ($adifile in $adifiles) {
       $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
       $netprice = $grossprice
       Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
-      Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages
+      Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
       $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
       Add-WfmReadyFile -folder $newFolder
       Write-Host done
