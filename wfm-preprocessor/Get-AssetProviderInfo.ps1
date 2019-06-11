@@ -17,31 +17,31 @@ $tiers = @()
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 $step = $adifiles.count / 100
-$AllAssets = @()
+$allassets = @()
 
 #create output schema
-$RCObject = New-Object System.Object
-$RCObject | Add-Member -MemberType NoteProperty -Name Folder -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Title -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Product -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier1 -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier2 -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier3 -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier4 -Value $null
-$RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier5 -Value $null
-$AllAssets += $RCObject
+$asset = New-Object System.Object
+$asset | Add-Member -MemberType NoteProperty -Name Folder -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Title -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Product -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier1 -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier2 -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier3 -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier4 -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier5 -Value $null
+$allassets += $asset
 
 foreach ($adifile in $adifiles) {
   $counter++
   $xml = [xml](Get-Content $adifile)
-    $RCObject = New-Object System.Object
-    $RCObject | Add-Member -MemberType NoteProperty -Name Folder -Value $adifile.Directory.Name
-    $RCObject | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Asset_Name
-    $RCObject | Add-Member -MemberType NoteProperty -Name Title -Value ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -eq "Title" }).Value
-    $RCObject | Add-Member -MemberType NoteProperty -Name Provider -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
-    $RCObject | Add-Member -MemberType NoteProperty -Name Product -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Product
+    $asset = New-Object System.Object
+    $asset | Add-Member -MemberType NoteProperty -Name Folder -Value $adifile.Directory.Name
+    $asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Asset_Name
+    $asset | Add-Member -MemberType NoteProperty -Name Title -Value ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -eq "Title" }).Value
+    $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
+    $asset | Add-Member -MemberType NoteProperty -Name Product -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Product
     $tiercount = $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value.count
     Write-Log -Message "$adifile - Provider_Content_Tier count: $tiercount " -logFile $logFile
     if($null -ne $tiercount)
@@ -50,10 +50,10 @@ foreach ($adifile in $adifiles) {
         foreach($tier in $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value )
         {
             $i++
-            $RCObject | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier$i  -Value $tier
+            $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier$i  -Value $tier
         }
     }
-    $AllAssets += $RCObject
+    $allassets += $asset
   }
   if ($counter -ge $step) {
     Write-Progress -Activity "Search in Progress" -Status "$i% Complete:" -PercentComplete $i;
@@ -62,5 +62,5 @@ foreach ($adifile in $adifiles) {
     $i++
   }
 
-$allAssets |  Export-Csv -NoTypeInformation -Path $outputPath
+$allassets |  Export-Csv -NoTypeInformation -Path $outputPath
 Write-Host "Finished!" -ForegroundColor green
