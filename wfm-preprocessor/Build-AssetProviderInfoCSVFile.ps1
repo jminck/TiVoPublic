@@ -14,14 +14,16 @@ $logFile = "./assetproviderinfo-" + (Get-Date -Format yyyy-MM-dd) + ".log"
 $outputPath = "./assetproviderinfo.csv"
 $providers = @()
 $tiers = @()
-$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
+$adifiles = Get-ChildItem -Recurse /assets/TDS-ADI/ADI/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 $step = $adifiles.count / 100
+$pctcomplete = 0
 $allassets = @()
 
 #create output schema
 $asset = New-Object System.Object
 $asset | Add-Member -MemberType NoteProperty -Name Folder -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Filename -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Title -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $null
@@ -38,6 +40,7 @@ foreach ($adifile in $adifiles) {
   $xml = [xml](Get-Content $adifile)
     $asset = New-Object System.Object
     $asset | Add-Member -MemberType NoteProperty -Name Folder -Value $adifile.Directory.Name
+    $asset | Add-Member -MemberType NoteProperty -Name FileName -Value $adifile.Name
     $asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Asset_Name
     $asset | Add-Member -MemberType NoteProperty -Name Title -Value ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -eq "Title" }).Value
     $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
@@ -46,21 +49,22 @@ foreach ($adifile in $adifiles) {
     Write-Log -Message "$adifile - Provider_Content_Tier count: $tiercount " -logFile $logFile
     if($null -ne $tiercount)
         {
-        $i = 0
+        $tc = 0
         foreach($tier in $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value )
         {
-            $i++
-            $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier$i  -Value $tier
+            $tc++
+            $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier$tc  -Value $tier
         }
     }
     $allassets += $asset
-  }
+  
   if ($counter -ge $step) {
-    Write-Progress -Activity "Search in Progress" -Status "$i% Complete:" -PercentComplete $i;
+    $pctcomplete++
+    Write-Progress -Activity "Search in Progress" -Status "$pctcomplete% Complete:" -PercentComplete $pctcomplete;
     $counter = 0
-    Write-Host Percentage complete: $i
-    $i++
+    Write-Host Percentage complete: $pctcomplete
   }
+}
 
 $allassets |  Export-Csv -NoTypeInformation -Path $outputPath
 Write-Host "Finished!" -ForegroundColor green
