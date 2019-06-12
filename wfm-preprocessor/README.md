@@ -143,3 +143,19 @@ Mode                 LastWriteTime         Length Name
 --r--            6/9/2019 12:25 PM              0 APLH0017067700100002_20190609T122537Z.wfmready
 
 done
+
+
+### Utility scripts
+
+- Build-AssetProviderInfoCSVFile.ps1
+
+   This sctipt will output a CSV file with ADI file and folder names, Provider and Provider_Content_Tier information for all assets in a given path
+
+- Convert-BmpToJpg.ps1
+
+  Converts poster art from BMP to JPG format, and updates ADI properties for poster asset to the new image name, md5 hash and size. This script depends on ImageMagick software being installed on the machine running the script (https://imagemagick.org). Supported on Windows, Linux and Mac.
+
+
+- Update-AssetMajorVersion.ps1
+
+  This script updates the Version_Major property for all assets in an ADI package, and updates the name of the asset folder in the form of <assetid>_<timestamp> to allow an asset to be ingested again by WFM.
