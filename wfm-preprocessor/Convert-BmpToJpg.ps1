@@ -5,6 +5,8 @@
     .DESCRIPTION
         This script converts BMP poster art to JPG and udpates ADI file properties Content_FileSize and Content_CheckSum as well as the Content node
         containing the new file name
+
+        This script depends on ImageMagick to be installed https://imagemagick.org
 #>
 
 # load helper functions
@@ -14,11 +16,20 @@ $logFile = "./convert-bmptojpg-" + (Get-Date -Format yyyy-MM-dd) + ".log"
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/bmp/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 
-if(!((Get-Command "convert" -ErrorAction SilentlyContinue) -ne $null))
-{
-    Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
-    Throw "This script depends on ImageMagick to be installed https://imagemagick.org"
-}
+
+if($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue))
+    {
+        $magic = $null
+    }
+    elseif($null -ne (Get-Command "magick" -ErrorAction SilentlyContinue))
+    {
+        $magic = "magick"
+    }
+    else
+    {
+        Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
+        Throw "This script depends on ImageMagick to be installed https://imagemagick.org"
+    }
 
 $confirmation = $null
 
@@ -39,7 +50,12 @@ foreach ($adifile in $adifiles)
                 $bmppath = $adifile.DirectoryName + "/" + $passetname.value
                 $jpgpath = $bmppath.Replace(".bmp",".jpg")
 
-                $result = convert -verbose $bmppath $jpgpath #needs ImageMagick installed
+                if ($null -eq $magic)
+                {
+                    $result = convert -verbose $bmppath $jpgpath #needs ImageMagick installed
+                } else {
+                    $result = magic convert -verbose $bmppath $jpgpath #needs ImageMagick installed
+                }
 
                 Write-log -Message "processing $adifile.FullName" -logFile $logFile 
                 Write-log -Message "converting $bmppath" -logFile $logFile 
@@ -56,6 +72,14 @@ foreach ($adifile in $adifiles)
                 $pchecksum.Value = $md5
                 $pfilesize = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where {$_.Name -eq "Content_FileSize" }    
                 $pfilesize.Value = $filesize
+                if ($magic = $null)
+                {
+                    $dimensions = identify -ping -format "%w x %h" $jpg.FullName
+                } else {
+                    $dimensions = magick identify -ping -format "%w x %h" $jpg.FullName
+                }
+                $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
+                $pdimensions.Value = $dimensions.Replace(" ", "")
                 $xml.Save($adifile.fullname)
             }
             else
