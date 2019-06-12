@@ -68,3 +68,4 @@ foreach ($adifile in $adifiles) {
 
 $allassets |  Export-Csv -NoTypeInformation -Path $outputPath
 Write-Host "Finished!" -ForegroundColor green
+Write-host Output file: (dir $outputPath).FullName

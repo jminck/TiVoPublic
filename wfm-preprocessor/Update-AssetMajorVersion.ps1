@@ -33,7 +33,7 @@ foreach ($adifile in $adifiles)
             $xml.Save($adifile)
             $assetid = $xml.SelectNodes("//AMS[@Asset_Class='title']").Asset_ID
             $timestamp = (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + "Z"
-            $newfolder = $assetid + "-" + $timestamp 
+            $newfolder = $assetid + "_" + $timestamp 
             $folder = $adifile.directoryname
             rename-item $folder $newfolder  
             start-sleep -Milliseconds 100      
