@@ -23,7 +23,7 @@ foreach ($adifile in $adifiles)
         {
         $confirmation = Read-Host "Are you Sure You Want To Proceed: ((y)es/(n)o/(a)ll)"
         }
-        if ($confirmation -eq ('y' -or 'a')) {
+        if (($confirmation -eq 'y') -or ($confirmation -eq 'a')) {
             $xml = [xml](Get-Content $adifile)
             #rev version number
             [int]$version = $xml.ADI.Metadata.AMS.Version_Major

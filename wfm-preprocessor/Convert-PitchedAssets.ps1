@@ -28,6 +28,8 @@ foreach ($adifile in $adifiles) {
     if (!($skip[$skip.count - 1]))
     {
       Write-Log -Message "processing $adifile" -logFile $logFile
+      # make a backup of the file
+      Copy-Item $adifile ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
       # see if there are multiple XML files in the folder and log if so, we only expect one
       Get-XMLFileCount $adifile.Directory.FullName
       $xml = [xml](Get-Content $adifile)
