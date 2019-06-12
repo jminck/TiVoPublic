@@ -104,19 +104,6 @@ Launch PowerShell prompt by executing:
 /opt/microsoft/powershell/7-preview/pwsh
 ```
 
-PS /vagrant/TiVoStuff/wfm-preprocessor> dir *.ps1
-
-Mode                 LastWriteTime         Length Name
-
-----                 -------------         ------ ----
-
---r--            6/9/2019 11:52 AM           3855 Build-PackagesFromADI.ps1
-
---r--            6/9/2019 11:53 AM           1758 Convert-PitchedAssets.ps1
-
---r--            6/9/2019  7:29 AM          12871 PreprocessorFunctions.ps1
-
-
 Execute the script:
 ```sh
 PS /vagrant/TiVoStuff/wfm-preprocessor> ./Convert-PitchedAssets.ps1
@@ -130,17 +117,6 @@ ADI.DTD 6/9/2019 11:43:53 AM
 File is - -00:41:44.8913235 minutes old
 
 APLH0017067700100002_20190609T122537Z.XML 6/9/2019 12:25:37 PM
-
-File is - -00:00:00.8942146 minutes old
-
-
-   Directory: /vagrant/assets/catcher/APLH0017067700100002_20190609T122537Z
-
-Mode                 LastWriteTime         Length Name
-
-----                 -------------         ------ ----
-
---r--            6/9/2019 12:25 PM              0 APLH0017067700100002_20190609T122537Z.wfmready
 
 done
 
