@@ -14,7 +14,7 @@ $logFile = "./assetproviderinfo-" + (Get-Date -Format yyyy-MM-dd) + ".log"
 $outputPath = "./assetproviderinfo.csv"
 $providers = @()
 $tiers = @()
-$adifiles = Get-ChildItem -Recurse /assets/TDS-ADI/ADI/*.xml
+$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 $step = $adifiles.count / 100
 $pctcomplete = 0
