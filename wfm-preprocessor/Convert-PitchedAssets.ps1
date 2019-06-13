@@ -11,7 +11,7 @@
 . ./PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "/assets/wfmtest/catcher"
+$catcher = "/assets/wfmtest/bmp"
 [xml]$packages = Get-Content "./packages2.xml"
 $packageNode = "Provider_Content_Tier" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
@@ -38,6 +38,7 @@ foreach ($adifile in $adifiles) {
       $netprice = $grossprice
       Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
       Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
+      Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
       $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
       Add-WfmReadyFile -folder $newFolder
       Write-Host done

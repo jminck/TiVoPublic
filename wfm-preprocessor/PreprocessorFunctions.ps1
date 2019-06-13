@@ -502,13 +502,11 @@ function Convert-PosterBmpToJpg {
             }
             write-host "processing $adifile for conversion of BMP to JPG poster"
   
-            $xml = [xml](Get-Content $adifile)
-
             if ($xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content.Value -like "*bmp") {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
                 $bmppath = $adifile.DirectoryName + "/" + $passetname.value
                 $jpgpath = $bmppath.Replace(".bmp", ".jpg")
-                if ($null -eq $magic) {
+                if ($null -eq $magic) { #windows uses "magic.exe convert", linux and mac just use "convert"
                     $result = convert -verbose $bmppath $jpgpath #needs ImageMagick installed
                 }
                 else {
