@@ -30,16 +30,11 @@ $asset | Add-Member -MemberType NoteProperty -Name Title -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider_Missing -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Product -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier1 -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier1_Missing -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier2 -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier2_Missing -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier3 -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier3_Missing -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier4 -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier4_Missing -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier5 -Value $null
-$asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier5_Missing -Value $null
+for($i = 1; $i -lt 6; $i++)
+{
+  $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier$i -Value $null
+  $asset | Add-Member -MemberType NoteProperty -Name ("Provider_Content_Tier" + $i + "_Missing") -Value $null
+}
 $asset | Add-Member -MemberType NoteProperty -Name Suggested_Price -Value $null
 $allassets += $asset
 
