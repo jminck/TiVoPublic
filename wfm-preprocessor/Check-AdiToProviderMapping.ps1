@@ -84,6 +84,10 @@ foreach ($adifile in $adifiles) {
             $counter = 0
             Write-Host Percentage complete: $pctcomplete
         }
+    } else {
+      Write-Log -Message "-----------------------------------------------------------------------------------------------------------------" -logFile $logFile
+      $msg = "Asset " + $asset.Folder + " - " + $asset.Asset_Name + " is not an SVOD candidate - Suggested_Price is " + $asset.Suggested_Price
+      Write-Log -Message  $msg -logFile $logFile
     }
 }
 $allassets | Export-Csv -NoTypeInformation -Path $outputPath
