@@ -115,6 +115,99 @@ function Add-GrossNetPrice {
     }
 } #End function
 
+function Compare-AdiToPackageXml {
+    <#
+.Synopsis
+  The short function description.
+.Description
+	The long function description
+.Example
+	C:\PS>Function-Name -param "Param Value"
+	
+	This example does something
+.Example
+	C:\PS>
+    
+	You can have multiple examples
+.Notes
+	Name: Function-Name
+	Author: Author Name
+	Last Edit: Date
+	Keywords: Any keywords
+.Inputs
+	None
+.Outputs
+	None
+#Requires -Version 2.0
+#>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI xml object")]
+        [System.Xml.XmlDocument]$xml,
+
+        [Parameter(Mandatory = $true, HelpMessage = "Enter packages xml object")]
+        [System.Xml.XmlDocument]$packages,
+
+        [Parameter(Mandatory = $true, HelpMessage = "Enter package XML node to use for lookup")]
+        [string]$packagenode,
+
+        [Parameter(Mandatory = $true)]
+        [string]$grossprice,
+
+        [Parameter(Mandatory = $false)]
+        [string]$tier
+    )
+    process {
+        try {
+            $exists = $false
+            Write-Log -Message "Entering Compare-AdiToPackageXml" -logFile $logFile
+            if ($grossprice -lt 0.001) {
+                # only assets with price of 0 can be SVOD
+                # get existing tier information
+                if ($packagenode -eq "Provider_Content_Tier") {
+                    $pctier = ($xml.SelectNodes("//App_Data") | Where-Object { $_.Value -match $tier }).Value
+                }
+                elseif ($packagenode -eq "Provider") {
+                    $pctier = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider  
+                }
+                else {
+                    ThrowError -ExceptionName "InvalidPackageNode" -ExceptionMessage "packagenode $packagenode was not found in packages.xml"
+                }
+        
+                Write-Log -Message "Using $packagenode as package.xml lookup node" -logFile $logFile
+                if ($pctier.count -gt 1) {
+                    Write-Log -Message "Multiple $packagenode nodes detected - " -logFile $logFile
+                    foreach ($tier in $pctier) { $tierlist += $tier + "`r`n" }
+                    Write-Log -Message $tierlist -logFile $logFile
+                    $pctierval = $pctier[0] # if ADI has more than one Content tiers, pick first one until we figure out better logic
+                    Write-Log -Message "$packagenode chosen for matching - $pctierval" -logFile $logFile
+                }
+                else {
+                    $pctierval = $pctier
+                    Write-Log -Message "$packagenode=$pctierval" -logFile $logFile
+                }
+                $packagetier = $packages.SelectNodes("//$packagenode[text()='$pctierval']").ParentNode.ParentNode.Name
+                # we didn't find a match for the SVOD offer
+                if ($null -eq $packagetier) {
+                    $packagetier = "NOTFOUND"
+                    Write-Log -Message "Did not find a match for $pctierval - update Packages.xml with tier information if this asset should be associated with an SVOD package" -logFile $logFile -Severity Warning
+                }
+                else {
+                    # check for existing Package_offder_ID node
+                    Write-Log -Message "Found a match for $pctierval" -logFile $logFile -Severity Information
+                    $exists = $true
+                }
+            }
+            return $exists
+        }
+        catch {
+            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-Log -Message $_.Exception.Message -Severity "Error"
+        }
+    }
+} #End function
+
 function Add-SvodPackage {
     <#
 .Synopsis
