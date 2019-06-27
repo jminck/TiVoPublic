@@ -31,22 +31,13 @@ centos6=true
 echo -----------------------------------------------------------------
 echo CentOS 6 Specific tasks
 echo -----------------------------------------------------------------
-
 fi
-
 if (( $(echo "$VER 7" | awk '{print ($1 >= $2)}') && $(echo "$VER 8" | awk '{print ($1 < $2)}') )); then
 centos7=true
 echo -----------------------------------------------------------------
 echo CentOS 7 Specific tasks
 echo -----------------------------------------------------------------
-
 fi
-echo -----------------------------------------------------------------
-echo collecting network information
-echo -----------------------------------------------------------------
-ifconfig 
-echo
-netstat -rn
 echo
 if [ $centos7 ] ; then
 echo -----------------------------------------------------------------
@@ -63,10 +54,11 @@ service --status-all
 echo
 fi
 echo -----------------------------------------------------------------
-echo collecting routes
+echo collecting network information
 echo -----------------------------------------------------------------
-route -ve
+ifconfig 
 echo
+netstat -rn
 echo -----------------------------------------------------------------
 echo collecting disk block device info
 echo -----------------------------------------------------------------
