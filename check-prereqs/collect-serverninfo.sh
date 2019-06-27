@@ -83,7 +83,7 @@ echo -----------------------------------------------------------------
 echo collecting name resolution information
 echo -----------------------------------------------------------------
 echo running command: ping -c 2 tivo.com
-ping -c 2 tivo.com
+ping -c 2 www.tivo.com
 echo
 echo -----
 echo running command: cat /etc/resolv.conf
