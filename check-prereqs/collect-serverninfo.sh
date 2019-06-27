@@ -64,6 +64,9 @@ echo collecting disk block device info
 echo -----------------------------------------------------------------
 lsblk
 echo
+pgdisplay
+echo
+vgdisplay
 echo -----------------------------------------------------------------
 echo collecting mount points
 echo -----------------------------------------------------------------
