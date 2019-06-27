@@ -1,6 +1,6 @@
 #!/bin/bash
 echo -----------------------------------------------------------------
-echo collect-serverinfo.sh version 1.0.06-08-2019
+echo collect-serverinfo.sh version 1.0.06-27-2019
 echo checking if we have sufficient permissisions to run the script
 echo -----------------------------------------------------------------
 id
