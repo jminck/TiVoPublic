@@ -31,10 +31,7 @@ centos6=true
 echo -----------------------------------------------------------------
 echo CentOS 6 Specific tasks
 echo -----------------------------------------------------------------
-yum install wget -y
-wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-rpm -ivh epel-release-6-8.noarch.rpm
-sed -i "s/mirrorlist=https/mirrorlist=http/" /etc/yum.repos.d/epel.repo
+
 fi
 
 if (( $(echo "$VER 7" | awk '{print ($1 >= $2)}') && $(echo "$VER 8" | awk '{print ($1 < $2)}') )); then
@@ -42,19 +39,14 @@ centos7=true
 echo -----------------------------------------------------------------
 echo CentOS 7 Specific tasks
 echo -----------------------------------------------------------------
-yum install wget -y
-wget http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-rpm -ivh epel-release-latest-7.noarch.rpm
+
 fi
 echo -----------------------------------------------------------------
-echo installing facter and net-tools
+echo collecting network information
 echo -----------------------------------------------------------------
-yum install facter net-tools -y
+ifconfig 
 echo
-echo -----------------------------------------------------------------
-echo collecting info from facter
-echo -----------------------------------------------------------------
-facter
+netstat -rn
 echo
 if [ $centos7 ] ; then
 echo -----------------------------------------------------------------
