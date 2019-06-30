@@ -579,7 +579,9 @@ function Convert-PosterBmpToJpg {
     param
     (
         [Parameter(Mandatory = $true, HelpMessage = "Enter ADI file to process")]
-        [System.IO.FileInfo]$adifile
+        [System.IO.FileInfo]$adifile,
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI xml object")]
+        [System.Xml.XmlDocument]$xml
     )
     process {
         try {

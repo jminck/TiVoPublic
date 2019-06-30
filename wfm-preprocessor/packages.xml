@@ -6,7 +6,7 @@
 <Assets>
   <Tiers>
     <Tier>
-      <Name>basic</Name>
+      <Name>super-svod</Name>
       <Providers>
         <Provider>ABC</Provider>
         <Provider>ABC_HD</Provider>
