@@ -595,6 +595,9 @@ function Convert-PosterBmpToJpg {
             elseif ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
                 $magic = $null
             }
+            elseif ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
+                $magic = $null
+            }
             else {
                 Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
                 Throw "This script depends on ImageMagick to be installed https://imagemagick.org"
