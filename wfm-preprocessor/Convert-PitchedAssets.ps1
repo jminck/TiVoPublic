@@ -20,34 +20,34 @@ $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
 # process ADI files
 $adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
 foreach ($adifile in $adifiles) {
-  if ((Get-ChildItem $adifile.DirectoryName -Name *.wfmready).count -gt 0) { # skip folders already containing a .wfmready file
-    Write-Host $adifile.DirectoryName already processed
-  }
-  else {
-    $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName)
-    if (!($skip[$skip.count - 1]))
-    {
-      Write-Log -Message "processing $adifile" -logFile $logFile
-      # make a backup of the file
-      Copy-Item $adifile.FullName ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
-      # see if there are multiple XML files in the folder and log if so, we only expect one
-      Get-XMLFileCount $adifile.Directory.FullName
-      $xml = [xml](Get-Content $adifile.FullName)
-      # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
-      $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
-      $netprice = $grossprice
-      Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
-      $xml.Save($adifile.fullname)
-      $xml = [xml](Get-Content $adifile.FullName)
-      Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
-      $xml.Save($adifile.fullname)
-      $xml = [xml](Get-Content $adifile.FullName)
-      Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
-      $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
-      Add-WfmReadyFile -folder $newFolder
-      Write-Host done
-      Write-Log -Message "--- finished processing $adifile" -logFile $logFile
-      sleep 1
+    if ((Get-ChildItem $adifile.DirectoryName -Name *.wfmready).count -gt 0) {
+        # skip folders already containing a .wfmready file
+        Write-Host $adifile.DirectoryName already processed
     }
-  }
+    else {
+        $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName)
+        if (!($skip[$skip.count - 1])) {
+            Write-Log -Message "processing $adifile" -logFile $logFile
+            # make a backup of the file
+            Copy-Item $adifile.FullName ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
+            # see if there are multiple XML files in the folder and log if so, we only expect one
+            Get-XMLFileCount $adifile.Directory.FullName
+            $xml = [xml](Get-Content $adifile.FullName)
+            # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
+            $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
+            $netprice = $grossprice
+            Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
+            $xml.Save($adifile.fullname)
+            $xml = [xml](Get-Content $adifile.FullName)
+            Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
+            $xml.Save($adifile.fullname)
+            $xml = [xml](Get-Content $adifile.FullName)
+            Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
+            $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
+            Add-WfmReadyFile -folder $newFolder
+            Write-Host done
+            Write-Log -Message "--- finished processing $adifile" -logFile $logFile
+            sleep 1
+        }
+    }
 }

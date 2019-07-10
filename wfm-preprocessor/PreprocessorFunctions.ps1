@@ -416,7 +416,7 @@ function Add-WfmReadyFile {
     )
     process {
         try {
-            $files = Get-ChildItem $folder.FullName -exclude *.xml,*.bak
+            $files = Get-ChildItem $folder.FullName -exclude *.xml, *.bak
             $adifile = Get-ChildItem $folder.FullName -Filter *.xml
             $delay = -5
             $recentFileWrite = $false
@@ -593,11 +593,9 @@ function Convert-PosterBmpToJpg {
     process {
         try {
             #try to find the path to magick.exe
-            if($Env:OS.Contains("Windows"))
-            {
+            if ($Env:OS.Contains("Windows")) {
                 $magic = "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe"
-                if (!(Test-Path $magic))
-                {
+                if (!(Test-Path $magic)) {
                     Write-Log -Message  "did not find $magic" -logFile $logFile
                     Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
                     throw "did not find $magic"
@@ -616,7 +614,8 @@ function Convert-PosterBmpToJpg {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
                 $bmppath = $adifile.DirectoryName + "\" + $passetname.value
                 $jpgpath = $bmppath.Replace(".bmp", ".jpg")
-                if ($null -eq $magic) { #windows uses "magic.exe convert", linux and mac just use "convert"
+                if ($null -eq $magic) {
+                    #windows uses "magic.exe convert", linux and mac just use "convert"
                     $result = convert $bmppath $jpgpath #needs ImageMagick installed
                 }
                 else {
