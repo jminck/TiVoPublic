@@ -8,11 +8,11 @@
 #>
 
 # load helper functions
-. C:\Tools\TiVoStuff-master\wfm-preprocessor\PreprocessorFunctions.ps1
+. C:\TiVoStuff\wfm-preprocessor\PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "D:\IPContent\temp\"
-[xml]$packages = Get-Content "C:\Tools\TiVoStuff-master\packages-armstrong.xml"
+$catcher = "C:\assets\Armstrong\catcher\temp"
+[xml]$packages = Get-Content "C:\TiVoStuff\wfm-preprocessor\packages-armstrong.xml"
 $packageNode = "Provider" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
@@ -37,7 +37,11 @@ foreach ($adifile in $adifiles) {
       $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
       $netprice = $grossprice
       Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
+      $xml.Save($adifile.fullname)
+      $xml = [xml](Get-Content $adifile.FullName)
       Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
+      $xml.Save($adifile.fullname)
+      $xml = [xml](Get-Content $adifile.FullName)
       Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
       $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
       Add-WfmReadyFile -folder $newFolder

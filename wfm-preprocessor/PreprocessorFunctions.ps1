@@ -109,6 +109,7 @@ function Add-GrossNetPrice {
             }
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -202,6 +203,7 @@ function Compare-AdiToPackageXml {
             return $exists
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -319,6 +321,7 @@ function Add-SvodPackage {
             }
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -373,6 +376,7 @@ function Rename-AssetAndFolder {
             return $newfolder
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -412,13 +416,13 @@ function Add-WfmReadyFile {
     )
     process {
         try {
-            $files = Get-ChildItem $folder.FullName
+            $files = Get-ChildItem $folder.FullName -exclude *.xml,*.bak
             $adifile = Get-ChildItem $folder.FullName -Filter *.xml
             $delay = -5
             $recentFileWrite = $false
             foreach ($file in $files) {
                 Write-Host $File.Name $file.LastWriteTime
-                Write-Host File is - ($file.LastWriteTime - (Get-Date)) minutes old
+                #Write-Host File is   ((Get-Date)-($file.LastWriteTime)) minutes old
                 if ($file.LastWriteTime -ge (Get-Date).AddMinutes($delay)) {
                     if ($file.Name -ne $adifile.Name) {
                         #flag that file timestamps are too new to mark folder with .wfmready 
@@ -436,6 +440,7 @@ function Add-WfmReadyFile {
             }
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -497,6 +502,7 @@ function Skip-CurrentTransfers {
             return $recentFileWrite
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -543,6 +549,7 @@ function Get-XMLFileCount {
             }
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
@@ -588,12 +595,13 @@ function Convert-PosterBmpToJpg {
             #try to find the path to magick.exe
             if($Env:OS.Contains("Windows"))
             {
-                $magic = dir -Recurse "c:\Program Files\ImageMagick*\magick.exe" 
-                $Env:path += $magic.DirectoryName
-                $magic = "c:\Program Files\ImageMagick*\magick.exe" 
-            }
-            elseif ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
-                $magic = $null
+                $magic = "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe"
+                if (!(Test-Path $magic))
+                {
+                    Write-Log -Message  "did not find $magic" -logFile $logFile
+                    Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
+                    throw "did not find $magic"
+                }
             }
             elseif ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
                 $magic = $null
@@ -612,7 +620,21 @@ function Convert-PosterBmpToJpg {
                     $result = convert $bmppath $jpgpath #needs ImageMagick installed
                 }
                 else {
-                    $result = Start-Process -NoNewWindow -Filepath "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe" -ArgumentList "convert $bmppath $jpgpath" #needs ImageMagick installed
+                    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+                    $pinfo.FileName = $magick
+                    $pinfo.RedirectStandardError = $true
+                    $pinfo.RedirectStandardOutput = $true
+                    $pinfo.UseShellExecute = $false
+                    $pinfo.Arguments = "convert $bmppath $jpgpath"
+                    $p = New-Object System.Diagnostics.Process
+                    $p.StartInfo = $pinfo
+                    $p.Start() | Out-Null
+                    $p.WaitForExit()
+                    $stdout = $p.StandardOutput.ReadToEnd()
+                    $stderr = $p.StandardError.ReadToEnd()
+                    Write-Host "stdout: $stdout"
+                    Write-Host "stderr: $stderr"
+                    Write-Host "exit code: " + $p.ExitCode
                 }
                 Write-log -Message "processing $adifile.FullName" -logFile $logFile 
                 Write-log -Message "converting $bmppath" -logFile $logFile 
@@ -631,7 +653,21 @@ function Convert-PosterBmpToJpg {
                     $dimensions = identify -ping -format "%w x %h" $jpg.FullName
                 }
                 else {
-                    $dimensions = Start-Process -NoNewWindow -Filepath "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe" -ArgumentList "identify -ping -format `"%w x %h`" $jpg.FullName"
+                    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+                    $pinfo.FileName = "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe"
+                    $pinfo.RedirectStandardError = $true
+                    $pinfo.RedirectStandardOutput = $true
+                    $pinfo.UseShellExecute = $false
+                    $pinfo.Arguments = "identify -ping -format `"%w x %h`" $jpg"
+                    $p = New-Object System.Diagnostics.Process
+                    $p.StartInfo = $pinfo
+                    $p.Start() | Out-Null
+                    $p.WaitForExit()
+                    $dimensions = $p.StandardOutput.ReadToEnd()
+                    $stderr = $p.StandardError.ReadToEnd()
+                    Write-Host "stdout: $dimensions"
+                    Write-Host "stderr: $stderr"
+                    Write-Host "exit code: " + $p.ExitCode
                 }
                 $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
                 $pdimensions.Value = $dimensions.Replace(" ", "")
@@ -644,8 +680,10 @@ function Convert-PosterBmpToJpg {
             } 
         }
         catch {
+            Write-Host $PSItem.InvocationInfo
             Write-Host $_.Exception.Message -ForegroundColor Yellow
             Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
+           
         }
     
     } 
