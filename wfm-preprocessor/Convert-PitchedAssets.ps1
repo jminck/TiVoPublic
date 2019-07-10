@@ -34,14 +34,16 @@ foreach ($adifile in $adifiles) {
             Get-XMLFileCount $adifile.Directory.FullName
             $xml = [xml](Get-Content $adifile.FullName)
             # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
-            $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
-            $netprice = $grossprice
-            Add-GrossNetPrice -Xml $xml -grossprice $grossprice -netprice $netprice
+            $suggestedprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
+            $isSvod = Add-SvodPackage -Xml $xml -grossprice $suggestedprice -packages $packages -packagenode $packageNode
             $xml.Save($adifile.fullname)
             $xml = [xml](Get-Content $adifile.FullName)
-            Add-SvodPackage -Xml $xml -grossprice $grossprice -packages $packages -packagenode $packageNode
-            $xml.Save($adifile.fullname)
-            $xml = [xml](Get-Content $adifile.FullName)
+            if ($true -ne $issvod)
+            {
+                Add-GrossNetPrice -Xml $xml -grossprice $suggestedprice -netprice $suggestedprice
+                $xml.Save($adifile.fullname)
+                $xml = [xml](Get-Content $adifile.FullName)            
+            }
             Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
             $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
             Add-WfmReadyFile -folder $newFolder
