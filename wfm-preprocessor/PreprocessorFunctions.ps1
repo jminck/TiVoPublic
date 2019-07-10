@@ -86,7 +86,7 @@ function Add-GrossNetPrice {
         try {
             $gp = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Gross_price" }
 
-            if (($gp.count -eq 0)) {
+            if (($gp.count -eq 0) -or ($gp -eq $null)) {
                 [xml]$childnode = "<App_Data App='MOD' Name='Gross_price' Value=''/>"
                 $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true))
                 $gp = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Gross_price" }
@@ -98,7 +98,7 @@ function Add-GrossNetPrice {
 
             $np = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Net_price" }
 
-            if (($np.count -eq 0)) {
+            if (($np.count -eq 0) -or ($np -eq $null)) {
                 [xml]$childnode = "<App_Data App='MOD' Name='Net_price' Value=''/>"
                 $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true))
                 $np = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Net_price" }
@@ -110,7 +110,7 @@ function Add-GrossNetPrice {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -203,7 +203,7 @@ function Compare-AdiToPackageXml {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -320,7 +320,7 @@ function Add-SvodPackage {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -374,7 +374,7 @@ function Rename-AssetAndFolder {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -412,8 +412,8 @@ function Add-WfmReadyFile {
     )
     process {
         try {
-            $files = Get-ChildItem $folder
-            $adifile = Get-ChildItem $folder -Filter *.xml
+            $files = Get-ChildItem $folder.FullName
+            $adifile = Get-ChildItem $folder.FullName -Filter *.xml
             $delay = -5
             $recentFileWrite = $false
             foreach ($file in $files) {
@@ -437,7 +437,7 @@ function Add-WfmReadyFile {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -498,7 +498,7 @@ function Skip-CurrentTransfers {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -544,7 +544,7 @@ function Get-XMLFileCount {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     }
 } #End function
@@ -585,11 +585,15 @@ function Convert-PosterBmpToJpg {
     )
     process {
         try {
-            if ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
-                $magic = $null
+            #try to find the path to magick.exe
+            if($Env:OS.Contains("Windows"))
+            {
+                $magic = dir -Recurse "c:\Program Files\ImageMagick*\magick.exe" 
+                $Env:path += $magic.DirectoryName
+                $magic = "c:\Program Files\ImageMagick*\magick.exe" 
             }
-            elseif ($null -ne (Get-Command "magick" -ErrorAction SilentlyContinue)) {
-                $magic = "magick"
+            elseif ($null -ne (Get-Command "convert" -ErrorAction SilentlyContinue)) {
+                $magic = $null
             }
             else {
                 Write-Log -Message "This script depends on ImageMagick to be installed https://imagemagick.org" -logFile $logFile
@@ -599,13 +603,13 @@ function Convert-PosterBmpToJpg {
   
             if ($xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content.Value -like "*bmp") {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
-                $bmppath = $adifile.DirectoryName + "/" + $passetname.value
+                $bmppath = $adifile.DirectoryName + "\" + $passetname.value
                 $jpgpath = $bmppath.Replace(".bmp", ".jpg")
                 if ($null -eq $magic) { #windows uses "magic.exe convert", linux and mac just use "convert"
-                    $result = convert -verbose $bmppath $jpgpath #needs ImageMagick installed
+                    $result = convert $bmppath $jpgpath #needs ImageMagick installed
                 }
                 else {
-                    $result = magic convert -verbose $bmppath $jpgpath #needs ImageMagick installed
+                    $result = Start-Process -NoNewWindow -Filepath "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe" -ArgumentList "convert $bmppath $jpgpath" #needs ImageMagick installed
                 }
                 Write-log -Message "processing $adifile.FullName" -logFile $logFile 
                 Write-log -Message "converting $bmppath" -logFile $logFile 
@@ -619,12 +623,12 @@ function Convert-PosterBmpToJpg {
                 $pchecksum = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_CheckSum" }
                 $pchecksum.Value = $md5
                 $pfilesize = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_FileSize" }    
-                $pfilesize.Value = $filesize
+                $pfilesize.Value = $filesize.toString()
                 if ($null -eq $magic) {
                     $dimensions = identify -ping -format "%w x %h" $jpg.FullName
                 }
                 else {
-                    $dimensions = magick identify -ping -format "%w x %h" $jpg.FullName
+                    $dimensions = Start-Process -NoNewWindow -Filepath "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe" -ArgumentList "identify -ping -format `"%w x %h`" $jpg.FullName"
                 }
                 $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
                 $pdimensions.Value = $dimensions.Replace(" ", "")
@@ -638,7 +642,7 @@ function Convert-PosterBmpToJpg {
         }
         catch {
             Write-Host $_.Exception.Message -ForegroundColor Yellow
-            Write-Log -Message $_.Exception.Message -Severity "Error"
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
         }
     
     } 

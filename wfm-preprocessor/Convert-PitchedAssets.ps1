@@ -8,12 +8,12 @@
 #>
 
 # load helper functions
-. ./PreprocessorFunctions.ps1
+. C:\Tools\TiVoStuff-master\wfm-preprocessor\PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "/assets/wfmtest/bmp"
-[xml]$packages = Get-Content "./packages2.xml"
-$packageNode = "Provider_Content_Tier" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
+$catcher = "D:\IPContent\temp\"
+[xml]$packages = Get-Content "C:\Tools\TiVoStuff-master\packages-armstrong.xml"
+$packageNode = "Provider" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
 
@@ -29,10 +29,10 @@ foreach ($adifile in $adifiles) {
     {
       Write-Log -Message "processing $adifile" -logFile $logFile
       # make a backup of the file
-      Copy-Item $adifile ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
+      Copy-Item $adifile.FullName ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
       # see if there are multiple XML files in the folder and log if so, we only expect one
       Get-XMLFileCount $adifile.Directory.FullName
-      $xml = [xml](Get-Content $adifile)
+      $xml = [xml](Get-Content $adifile.FullName)
       # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
       $grossprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
       $netprice = $grossprice
@@ -43,6 +43,7 @@ foreach ($adifile in $adifiles) {
       Add-WfmReadyFile -folder $newFolder
       Write-Host done
       Write-Log -Message "--- finished processing $adifile" -logFile $logFile
+      sleep 1
     }
   }
 }
