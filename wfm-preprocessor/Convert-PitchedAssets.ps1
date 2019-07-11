@@ -11,7 +11,7 @@
 . C:\TiVoStuff\wfm-preprocessor\PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "C:\assets\Armstrong\catcher\temp"
+$catcher = "C:\assets\Armstrong\vp7\output"
 [xml]$packages = Get-Content "C:\TiVoStuff\wfm-preprocessor\packages-armstrong.xml"
 $packageNode = "Provider" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
 $logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
@@ -38,7 +38,7 @@ foreach ($adifile in $adifiles) {
             $isSvod = Add-SvodPackage -Xml $xml -grossprice $suggestedprice -packages $packages -packagenode $packageNode
             $xml.Save($adifile.fullname)
             $xml = [xml](Get-Content $adifile.FullName)
-            if ($true -ne $issvod)
+            if ($null -eq $isSvod)
             {
                 Add-GrossNetPrice -Xml $xml -grossprice $suggestedprice -netprice $suggestedprice
                 $xml.Save($adifile.fullname)

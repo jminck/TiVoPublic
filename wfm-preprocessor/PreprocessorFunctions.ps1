@@ -416,9 +416,9 @@ function Add-WfmReadyFile {
     )
     process {
         try {
-            $files = Get-ChildItem $folder.FullName -exclude *.xml, *.bak
+            $files = Get-ChildItem $folder.FullName -exclude *.xml, *.bak, *.jpg
             $adifile = Get-ChildItem $folder.FullName -Filter *.xml
-            $delay = -5
+            $delay = -1
             $recentFileWrite = $false
             foreach ($file in $files) {
                 Write-Host $File.Name $file.LastWriteTime
@@ -481,7 +481,7 @@ function Skip-CurrentTransfers {
     )
     process {
         try {
-            $files = Get-ChildItem $folder
+            $files = Get-ChildItem $folder -Exclude *.xml, *.bak, *.jpg
             [bool]$recentFileWrite = $false
             $delay = -1
             foreach ($file in $files) {
@@ -614,17 +614,19 @@ function Convert-PosterBmpToJpg {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
                 $bmppath = $adifile.DirectoryName + "\" + $passetname.value
                 $jpgpath = $bmppath.Replace(".bmp", ".jpg")
+                Write-log -Message "processing $adifile.FullName" -logFile $logFile 
+                Write-log -Message "converting $bmppath" -logFile $logFile 
                 if ($null -eq $magic) {
                     #windows uses "magic.exe convert", linux and mac just use "convert"
                     $result = convert $bmppath $jpgpath #needs ImageMagick installed
                 }
                 else {
                     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-                    $pinfo.FileName = $magick
+                    $pinfo.FileName = "$magic"
                     $pinfo.RedirectStandardError = $true
                     $pinfo.RedirectStandardOutput = $true
                     $pinfo.UseShellExecute = $false
-                    $pinfo.Arguments = "convert $bmppath $jpgpath"
+                    $pinfo.Arguments = "convert -verbose $bmppath $jpgpath"
                     $p = New-Object System.Diagnostics.Process
                     $p.StartInfo = $pinfo
                     $p.Start() | Out-Null
@@ -634,10 +636,10 @@ function Convert-PosterBmpToJpg {
                     Write-Host "stdout: $stdout"
                     Write-Host "stderr: $stderr"
                     Write-Host "exit code: " + $p.ExitCode
+                    Write-log -Message "magick convert output: $stdout $stderr" -logFile $logFile 
                 }
-                Write-log -Message "processing $adifile.FullName" -logFile $logFile 
-                Write-log -Message "converting $bmppath" -logFile $logFile 
-                Write-log -Message "convert output: $result" -logFile $logFile 
+
+
                 if (Test-Path $jpgpath) {
                     $jpg = get-item $jpgpath
                     $md5 = (Get-FileHash -Algorithm MD5 $jpg.FullName).hash
@@ -653,11 +655,11 @@ function Convert-PosterBmpToJpg {
                 }
                 else {
                     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-                    $pinfo.FileName = "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe"
+                    $pinfo.FileName = "$magic"
                     $pinfo.RedirectStandardError = $true
                     $pinfo.RedirectStandardOutput = $true
                     $pinfo.UseShellExecute = $false
-                    $pinfo.Arguments = "identify -ping -format `"%w x %h`" $jpg"
+                    $pinfo.Arguments = "identify -verbose -ping -format `"%w x %h`" $jpg"
                     $p = New-Object System.Diagnostics.Process
                     $p.StartInfo = $pinfo
                     $p.Start() | Out-Null
@@ -667,6 +669,7 @@ function Convert-PosterBmpToJpg {
                     Write-Host "stdout: $dimensions"
                     Write-Host "stderr: $stderr"
                     Write-Host "exit code: " + $p.ExitCode
+                    Write-log -Message "magick identify output: $stdout $stderr" -logFile $logFile 
                 }
                 $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
                 $pdimensions.Value = $dimensions.Replace(" ", "")

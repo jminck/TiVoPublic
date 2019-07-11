@@ -11,7 +11,7 @@
 . ./PreprocessorFunctions.ps1
 
 $logFile = "./updateassetversion-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
+$adifiles = Get-ChildItem -Recurse "C:\assets\Armstrong\catcher\Dropbox\X*" -Filter *.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 
 $confirmation = $null
