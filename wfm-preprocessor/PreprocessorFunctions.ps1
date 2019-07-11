@@ -669,10 +669,13 @@ function Convert-PosterBmpToJpg {
                     Write-Host "stdout: $dimensions"
                     Write-Host "stderr: $stderr"
                     Write-Host "exit code: " + $p.ExitCode
-                    Write-log -Message "magick identify output: $stdout $stderr" -logFile $logFile 
+                    Write-log -Message "magick identify output: $dimensions $stderr" -logFile $logFile 
                 }
                 $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
-                $pdimensions.Value = $dimensions.Replace(" ", "")
+                if ($null -ne $pdimensions)
+                {
+                    $pdimensions.Value = $dimensions.Replace(" ", "")
+                }
 
                 $xml.Save($adifile.fullname)
             }

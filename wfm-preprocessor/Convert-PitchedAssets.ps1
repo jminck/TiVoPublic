@@ -14,9 +14,9 @@
 $catcher = "C:\assets\Armstrong\vp7\output"
 [xml]$packages = Get-Content "C:\TiVoStuff\wfm-preprocessor\packages-armstrong.xml"
 $packageNode = "Provider" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
-$logFile = "./preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
-
-
+$logFile = "C:\TiVoStuff\wfm-preprocessor\preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
+Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
+Start-Transcript .\preprocessor-transcript.log
 # process ADI files
 $adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
 foreach ($adifile in $adifiles) {
