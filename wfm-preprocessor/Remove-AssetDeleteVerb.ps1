@@ -10,8 +10,8 @@
 # load helper functions
 . ./PreprocessorFunctions.ps1
 
-$logFile = "./setassetdeleteverb-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$adifiles = Get-ChildItem -Recurse "/assets/Armstrong/catcher/Dropbox/HXHT*" -Include *.xml
+$logFile = "./removeassetdeleteverb-" + (Get-Date -Format yyyy-MM-dd) + ".log"
+$adifiles = Get-ChildItem -Recurse "/assets/Armstrong/vp7/output/delete_VUBX0615437615344121_20190715T032357Z*" -Include *.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 
 $confirmation = $null
@@ -29,11 +29,12 @@ foreach ($adifile in $adifiles)
             [int]$version = $xml.ADI.Metadata.AMS.Version_Major
             $version++
             $props = $xml.SelectNodes("//AMS") 
-            foreach ($vmaj in $props) {$vmaj.SetAttribute("Verb","DELETE")}
+            foreach ($vmaj in $props) 
+                {$vmaj.RemoveAttribute("Verb")}
             $xml.Save($adifile)
             $assetid = $xml.SelectNodes("//AMS[@Asset_Class='title']").Asset_ID
             $timestamp = (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + "Z"
-            $newfolder = "delete_" + $assetid + "_" + $timestamp 
+            $newfolder = $assetid + "_" + $timestamp 
             $folder = $adifile.directoryname
             #add wfmready file if missing
             $wfmreadyfile =  $adifile.DirectoryName + "/" + $adifile.Name.toupper().Replace(".XML",".wfmready")
