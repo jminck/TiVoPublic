@@ -1,10 +1,10 @@
 
 <#
     .SYNOPSIS
-        This script updates asset version fore reimport
+        This script sets the delete verb for pitching an asset deletion
     .DESCRIPTION
-        This script wil increment the Version_Major of all assets in the ADI file, and update the asset's folder name with a new timestamp
-        to allow the asset to be re-ingest after a failed attempt to ingest, or other correction made to ADI data.
+        This script sets the delete verb for pitching an asset deletion, and update the asset's folder name with "delete_" and a new timestamp
+        to allow the asset to be removed from the TiVo VOD system.
 #>
 
 # load helper functions
