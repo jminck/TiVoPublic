@@ -8,13 +8,12 @@
 #>
 
 # load helper functions
-. C:\TiVoStuff\wfm-preprocessor\PreprocessorFunctions.ps1
+. .\PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "C:\assets\Armstrong\vp7\output"
-[xml]$packages = Get-Content "C:\TiVoStuff\wfm-preprocessor\packages-armstrong.xml"
-$packageNode = "Provider" #can be "Provider_Content_Tier" or "Provider", node in packages.xml to use in lookup 
-$logFile = "C:\TiVoStuff\wfm-preprocessor\preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
+$catcher = "\assets\Armstrong\vp7\output\*"
+[xml]$packages = Get-Content ".\packages-armstrong.xml"
+$logFile = ".\preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
 Start-Transcript .\preprocessor-transcript.log
 # process ADI files
@@ -35,7 +34,7 @@ foreach ($adifile in $adifiles) {
             $xml = [xml](Get-Content $adifile.FullName)
             # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
             $suggestedprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
-            $isSvod = Add-SvodPackage -Xml $xml -grossprice $suggestedprice -packages $packages -packagenode $packageNode
+            $isSvod = Add-SvodPackage -Xml $xml -grossprice $suggestedprice -packages $packages 
             $xml.Save($adifile.fullname)
             $xml = [xml](Get-Content $adifile.FullName)
             if ($null -eq $isSvod)

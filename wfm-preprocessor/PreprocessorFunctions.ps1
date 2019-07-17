@@ -244,9 +244,6 @@ function Add-SvodPackage {
         [Parameter(Mandatory = $true, HelpMessage = "Enter packages xml object")]
         [System.Xml.XmlDocument]$packages,
 
-        [Parameter(Mandatory = $true, HelpMessage = "Enter package XML node to use for lookup")]
-        [string]$packagenode,
-
         [Parameter(Mandatory = $true)]
         [string]$grossprice
     )
@@ -255,29 +252,23 @@ function Add-SvodPackage {
             if ($grossprice -lt 0.001) {
                 # only assets with price of 0 can be SVOD
                 # get existing tier information
-                if ($packagenode -eq "Provider_Content_Tier") {
-                    $pctier = ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match $packagenode }).Value
-                }
-                elseif ($packagenode -eq "Provider") {
-                    $pctier = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider  
-                }
-                else {
-                    ThrowError -ExceptionName "InvalidPackageNode" -ExceptionMessage "packagenode $packagenode was not found in packages.xml"
-                }
-        
-                Write-Log -Message "Using $packagenode as package.xml lookup node" -logFile $logFile
-                if ($pctier.count -gt 1) {
-                    Write-Log -Message "Multiple $packagenode nodes detected - " -logFile $logFile
-                    foreach ($tier in $pctier) { $tierlist += $tier + "`r`n" }
-                    Write-Log -Message $tierlist -logFile $logFile
-                    $pctierval = $pctier[0] # if ADI has more than one Content tiers, pick first one until we figure out better logic
-                    Write-Log -Message "$packagenode chosen for matching - $pctierval" -logFile $logFile
+
+                $provider = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider  
+                $provider_id = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider_ID  
+
+                Write-Log -Message "Provider chosen for matching - $provider" -logFile $logFile
+                Write-Log -Message "Provider_ID chosen for matching - $provider" -logFile $logFile
+                $packagetier = $packages.SelectNodes("//Provider[text()='$provider']").ParentNode.ParentNode.Name
+                if ($null -eq $packagetier) #didn't find a Provider package tier, check Provider_ID
+                {
+                    $packagetier = $packages.SelectNodes("//Provider_ID[text()='$provider_id']").ParentNode.ParentNode.Name
+                    if ($null -ne $packagetier) {
+                        Write-Log -Message "Provider_ID was chosen for matching - $provider_id with packge ID $packagetier" -logFile $logFile
+                    }
                 }
                 else {
-                    $pctierval = $pctier
-                    Write-Log -Message "$packagenode=$pctierval" -logFile $logFile
+                    Write-Log -Message "Provider was chosen for matching - $provider with packge ID $packagetier" -logFile $logFile
                 }
-                $packagetier = $packages.SelectNodes("//$packagenode[text()='$pctierval']").ParentNode.ParentNode.Name
                 # we didn't find a match for the SVOD offer
                 if ($null -eq $packagetier) {
                     $packagetier = "NOTFOUND"
@@ -287,7 +278,7 @@ function Add-SvodPackage {
                     # check for existing Package_offder_ID node
                     $pkg = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Package_offer_ID" }
 
-                    if (($pkg.count -eq 0 -and $null -ne $pctier)) {
+                    if ((($pkg.count -eq 0 -or $null -eq $pkg )  -and $null -ne $packagetier)) {
                         # add a new offer element
                         Write-Log -Message "adding new node Package_offer_ID=$packagetier" -logFile $logFile
                         [xml]$childnode = "<App_Data App='MOD' Name='Package_offer_ID' Value='" + $packagetier + "'/>"
@@ -593,7 +584,7 @@ function Convert-PosterBmpToJpg {
     process {
         try {
             #try to find the path to magick.exe
-            if ($Env:OS.Contains("Windows")) {
+            if ($Env:OS) {
                 $magic = "C:\Program Files\ImageMagick-7.0.8-Q16\magick.exe"
                 if (!(Test-Path $magic)) {
                     Write-Log -Message  "did not find $magic" -logFile $logFile
@@ -613,6 +604,9 @@ function Convert-PosterBmpToJpg {
             if ($xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content.Value -like "*bmp") {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
                 $bmppath = $adifile.DirectoryName + "\" + $passetname.value
+                if ($IsLinux -or $IsMacOS) {
+                    $bmppath = $bmppath.replace("\","/")
+                }
                 $jpgpath = $bmppath.Replace(".bmp", ".jpg")
                 Write-log -Message "processing $adifile.FullName" -logFile $logFile 
                 Write-log -Message "converting $bmppath" -logFile $logFile 
