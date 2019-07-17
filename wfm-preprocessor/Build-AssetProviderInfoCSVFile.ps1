@@ -14,7 +14,7 @@ $logFile = "./assetproviderinfo-" + (Get-Date -Format yyyy-MM-dd) + ".log"
 $outputPath = "./assetproviderinfo.csv"
 $providers = @()
 $tiers = @()
-$adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
+$adifiles = Get-ChildItem -Recurse /assets/Armstrong/XMLFiles/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
 $step = $adifiles.count / 100
 $pctcomplete = 0
@@ -27,6 +27,7 @@ $asset | Add-Member -MemberType NoteProperty -Name Filename -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Title -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $null
+$asset | Add-Member -MemberType NoteProperty -Name Provider_ID -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Product -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier1 -Value $null
 $asset | Add-Member -MemberType NoteProperty -Name Provider_Content_Tier2 -Value $null
@@ -44,6 +45,7 @@ foreach ($adifile in $adifiles) {
     $asset | Add-Member -MemberType NoteProperty -Name Asset_Name  -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Asset_Name
     $asset | Add-Member -MemberType NoteProperty -Name Title -Value ($xml.SelectNodes("//App_Data") | Where-Object { $_.Name -eq "Title" }).Value
     $asset | Add-Member -MemberType NoteProperty -Name Provider -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
+    $asset | Add-Member -MemberType NoteProperty -Name Provider_ID -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider_ID
     $asset | Add-Member -MemberType NoteProperty -Name Product -Value $xml.SelectNodes("//AMS[@Asset_Class='package']").Product
     $tiercount = $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value.count
     Write-Log -Message "$adifile - Provider_Content_Tier count: $tiercount " -logFile $logFile
