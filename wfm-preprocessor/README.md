@@ -37,21 +37,41 @@ The script will produce an XML file with a schema like below. After the skeleton
 
   
   
-
-        <Assets>
-          <Provider_Content_Tier>
-            <Tier>
-              <Name>basic</Name>
-              <Providers>
-                <Provider>ABC</Provider>
-              </Providers>
-              <Provider_Content_Tiers>
-                <Provider_Content_Tier>ADULTSWIM_15</Provider_Content_Tier>
-              </Provider_Content_Tiers>
-            </Tier>
-          </Provider_Content_Tier>
-        </Assets>
-
+```
+<Assets>
+  <Tiers>
+    <Tier>
+      <Name>SCIENCE_CHANEL</Name>
+      <!-- Uses Provider attribute of ADI file -->
+      <Providers>
+        <Provider>SCIENCE_CHANNEL</Provider>
+        <Provider>SCIENCE_CHANNEL_HD</Provider>
+      </Providers>
+    </Tier>
+    <Tier>
+    <!-- Uses Provider_ID attribute of ADI file -->
+      <Name>TVN</Name>
+      <Provider_IDs>
+        <Provider_ID>TVN.com</Provider_ID>
+      </Provider_IDs>
+    </Tier>
+    <Tier>
+      <Name>BASIC</Name>
+      <Providers>
+        <Provider>ANIMAL_PLANET</Provider>
+        <Provider>ANIMAL_PLANET_HD</Provider>
+         <Provider>DISCOVERY_CHANNEL_HD</Provider>
+        <Provider>DISCOVERY_FAMILY_HD</Provider>
+        <Provider>MOTORTREND_HD</Provider>
+        <Provider>NBC_NETSHOWS_C3R</Provider>
+        <Provider>SCIENCE_CHANNEL</Provider>
+        <Provider>SCIENCE_CHANNEL_HD</Provider>
+        <Provider>TVN</Provider>
+      </Providers>
+    </Tier>
+ </Tiers>
+</Assets>
+```
   
 
 ##### Set variables in Convert-PitchedAssets.ps1
@@ -84,11 +104,15 @@ The process will perform the folllowing actions:
 
   * Gross_price and Net_price are set to 0 
 AND
-  * A matching Provider_Content_Tier or Provider was found in packages.xml (depending on which was the lookup element specified in the script in the $packageNode variable)
+  * A matching Provider or Provider_ID was found in packages.xml (depending on which was the lookup element specified in the script in the $packageNode variable)
+
+    NOTE - If determined to be an SVOD package, then Gross_price and Net_price elements are not created, only Package_offer_ID is created
 
 * Rename the asset folder as [assetID]_[timestamp] per wfm requirements.
 
 * Check the last modified timestamp of assets in the folder, and if older than x minutes, mark the asset is ready for wfm ingestion by adding a <xml>.wfmready file to the folder, where <xml> is the base file name of the ADI xml file. If last modified time of any asset files is less than n minutes, assume the asset is still being transfered to the catcher and don't mark the folder as ready to ingest
+
+* Optionally convert BMP poster art to JPG if needed. This function depends on ImageMagick software being installed (https://imagemagick.org/index.php)
 
 ### Running the script on a schedule
 This script can be run on a schedule (suggested interval every 30 minutes)

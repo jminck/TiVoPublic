@@ -26,8 +26,9 @@
 . ./PreprocessorFunctions.ps1
 
 $logFile = "./packages-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$outputPath = "./packages.xml"
+$outputPath = "./test-packages.xml"
 $providers = @()
+$provider_ids = @()
 $tiers = @()
 $adifiles = Get-ChildItem -Recurse /assets/wfmtest/catcher/*.xml
 Write-Log -Message "ADI files found: $adifiles.Count" -logFile $logFile
@@ -37,10 +38,13 @@ foreach ($adifile in $adifiles) {
   $counter++
   $xml = [xml](Get-Content $adifile)
   $providers += $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
+  $provider_ids += $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider_id
   $tiers += $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value
   Write-Log -Message "Scanning $adifile" -logFile $logFile
   $p = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider
   Write-Log -Message "Provider name is $p" -logFile $logFile
+  $p = $xml.SelectNodes("//AMS[@Asset_Class='package']").Provider_ID
+  Write-Log -Message "Provider_ID name is $p" -logFile $logFile
   $p = $xml.SelectNodes("//AMS[@Asset_Class='package']").Asset_Name
   Write-Log -Message "Asset_name is $p" -logFile $logFile
   $p = $xml.SelectNodes("//ADI/Metadata/App_Data[@Name='Provider_Content_Tier']").value
@@ -58,6 +62,7 @@ foreach ($adifile in $adifiles) {
 }
 
 $providers = $providers | Sort-Object -Unique
+$provider_ids = $provider_ids | Sort-Object -Unique
 $tiers = $tiers | Sort-Object -Unique
 Write-Host "Initializing new XML document" -ForegroundColor Green
 [xml]$Doc = New-Object System.Xml.XmlDocument
@@ -92,6 +97,15 @@ foreach ($provider in $providers) {
   $provider_node.AppendChild($pvd) | Out-Null
 }
 
+#create an element
+$provider_id_node = $doc.CreateNode("element","Provider_IDs",$null)
+#assign a value
+foreach ($provider_id in $provider_ids) {
+  $pvd = $doc.CreateElement("Provider_ID")
+  $pvd.InnerText = $provider_id
+  $provider_id_node.AppendChild($pvd) | Out-Null
+}
+
 $content_tier_node = $doc.CreateNode("element","Provider_Content_Tiers",$null)
 #assign a value
 foreach ($tier in $tiers) {
@@ -102,6 +116,8 @@ foreach ($tier in $tiers) {
 
 #add to parent node
 $tiernode.AppendChild($provider_node) | Out-Null
+
+$tiernode.AppendChild($provider_id_node) | Out-Null
 
 $tiernode.AppendChild($content_tier_node) | Out-Null
 
