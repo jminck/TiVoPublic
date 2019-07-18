@@ -8,11 +8,12 @@ wfm-preprocessor adds required TiVo VOD extension fields to ADI files, and adds 
 
 ### Preparation
 
-This script uses the Provider_Content_Tier element of the ADI file by default as the lookup to determine the SVOD packaage the asset belongs to, if any, for example:
+This script uses the Provider and Provider_ID attributes of the ADI file by default as the lookup to determine the SVOD packaage the asset belongs to, if any, for example:
 
-  <App_Data App="MOD" Name="__Provider_Content_Tier__" Value="__ADULTSWIM_15__" />
+ <AMS Asset_Class="package" Asset_ID="AEHP2127441903080000" Asset_Name="AEHP2127441903080000_ZHHH_HD" Creation_Date="2019-03-12" Description="ZombieHouseFlipping_TheSchoolHouse_212744-package" Product="SVOD" __Provider="AE_HD"__  __Provider_ID="aetv.com"__ Verb="" Version_Major="1" Version_Minor="0" />
 
-The lookup table of Provider_Content_Tier values to SVOD packages is stored in an XML file called packages.xml
+
+The lookup table of Provider and Provider_ID values to SVOD packages is stored in an XML file called packages.xml
 This file needs to be created and maintained by the VOD ingestion operations team. To seed the initial creation of this file, the script Build-PackagesFromADIFiles.ps1 can build an initial XML skeleton and extract the list of Provider_Content_Tier values that exist in existing asset ADI library.
 
 ##### Set variables in Build-PackagesFromADIFiles.ps1
