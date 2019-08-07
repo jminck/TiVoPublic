@@ -1,0 +1,4 @@
+<var>
+    <catcher>/assets/wfmtest/bmp/*.xml</catcher>
+    <packages>.\packages-armstrong.xml</packages>
+</var>

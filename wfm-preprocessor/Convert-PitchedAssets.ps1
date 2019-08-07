@@ -7,15 +7,24 @@
         required by TiVO VOD
 #>
 
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
+Set-Location $ScriptDir
+
+#load variables from config
+$vars = ([xml](Get-Content ./config.xml))
+$logFile = ".\preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
+
 # load helper functions
 . .\PreprocessorFunctions.ps1
 
 # set required variables
-$catcher = "\assets\Armstrong\vp7\output\*"
-[xml]$packages = Get-Content ".\packages-armstrong.xml"
-$logFile = ".\preprocessor_" + (Get-Date -Format yyyy-MM-dd) + ".log"
+$catcher = $vars.var.catcher
+[xml]$packages = Get-Content $vars.var.packages
+
+
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
-Start-Transcript .\preprocessor-transcript.log
+Write-Log -Message "Using variables $vars" -logFile $logFile
+
 # process ADI files
 $adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
 foreach ($adifile in $adifiles) {
@@ -45,7 +54,12 @@ foreach ($adifile in $adifiles) {
             }
             Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
             $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
+            if(!(Test-Path ($adifile.DirectoryPath + "/wfm-preprocessor.failure")))
+            {
             Add-WfmReadyFile -folder $newFolder
+            } else {
+                Write-Log -Message "ERROR - wfm-preprocessor.failure exists in folder, not adding .wfmready file to folder! - see wfm-preprocessor.failure for further information, and delete wfm-preprocessor.failure if the issue has been resolved" -logFile $logFile -Severity "Error"
+            }
             Write-Host done
             Write-Log -Message "--- finished processing $adifile" -logFile $logFile
             sleep 1

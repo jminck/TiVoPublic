@@ -259,8 +259,7 @@ function Add-SvodPackage {
                 Write-Log -Message "Provider chosen for matching - $provider" -logFile $logFile
                 Write-Log -Message "Provider_ID chosen for matching - $provider" -logFile $logFile
                 $packagetier = $packages.SelectNodes("//Provider[text()='$provider']").ParentNode.ParentNode.Name
-                if ($null -eq $packagetier) #didn't find a Provider package tier, check Provider_ID
-                {
+                if ($null -eq $packagetier) { #didn't find a Provider package tier, check Provider_ID
                     $packagetier = $packages.SelectNodes("//Provider_ID[text()='$provider_id']").ParentNode.ParentNode.Name
                     if ($null -ne $packagetier) {
                         Write-Log -Message "Provider_ID was chosen for matching - $provider_id with packge ID $packagetier" -logFile $logFile
@@ -278,7 +277,7 @@ function Add-SvodPackage {
                     # check for existing Package_offder_ID node
                     $pkg = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Package_offer_ID" }
 
-                    if ((($pkg.count -eq 0 -or $null -eq $pkg )  -and $null -ne $packagetier)) {
+                    if ((($pkg.count -eq 0 -or $null -eq $pkg ) -and $null -ne $packagetier)) {
                         # add a new offer element
                         Write-Log -Message "adding new node Package_offer_ID=$packagetier" -logFile $logFile
                         [xml]$childnode = "<App_Data App='MOD' Name='Package_offer_ID' Value='" + $packagetier + "'/>"
@@ -605,73 +604,82 @@ function Convert-PosterBmpToJpg {
                 $passetname = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.ParentNode.Content
                 $bmppath = $adifile.DirectoryName + "\" + $passetname.value
                 if ($IsLinux -or $IsMacOS) {
-                    $bmppath = $bmppath.replace("\","/")
+                    $bmppath = $bmppath.replace("\", "/")
                 }
-                $jpgpath = $bmppath.Replace(".bmp", ".jpg")
-                Write-log -Message "processing $adifile.FullName" -logFile $logFile 
-                Write-log -Message "converting $bmppath" -logFile $logFile 
-                if ($null -eq $magic) {
-                    #windows uses "magic.exe convert", linux and mac just use "convert"
-                    $result = convert $bmppath $jpgpath #needs ImageMagick installed
+                if (Test-Path $bmppath) {
+                    Write-log -Message "$bmppath was found, continuing" -logFile $logFile        
+                
+                    $jpgpath = $bmppath.Replace(".bmp", ".jpg")
+                    Write-log -Message "processing $adifile.FullName" -logFile $logFile 
+                    Write-log -Message "converting $bmppath" -logFile $logFile 
+                    if ($null -eq $magic) {
+                        #windows uses "magic.exe convert", linux and mac just use "convert"
+                        $result = convert $bmppath $jpgpath #needs ImageMagick installed
+                    }
+                    else {
+                        $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+                        $pinfo.FileName = "$magic"
+                        $pinfo.RedirectStandardError = $true
+                        $pinfo.RedirectStandardOutput = $true
+                        $pinfo.UseShellExecute = $false
+                        $pinfo.Arguments = "convert -verbose $bmppath $jpgpath"
+                        $p = New-Object System.Diagnostics.Process
+                        $p.StartInfo = $pinfo
+                        $p.Start() | Out-Null
+                        $p.WaitForExit()
+                        $stdout = $p.StandardOutput.ReadToEnd()
+                        $stderr = $p.StandardError.ReadToEnd()
+                        Write-Host "stdout: $stdout"
+                        Write-Host "stderr: $stderr"
+                        Write-Host "exit code: " + $p.ExitCode
+                        Write-log -Message "magick convert output: $stdout $stderr" -logFile $logFile 
+                    }
+
+
+                    if (Test-Path $jpgpath) {
+                        $jpg = get-item $jpgpath
+                        $md5 = (Get-FileHash -Algorithm MD5 $jpg.FullName).hash
+                        $filesize = $jpg.Length
+                    }
+                    $passetname.value = $jpg.name
+                    $pchecksum = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_CheckSum" }
+                    $pchecksum.Value = $md5
+                    $pfilesize = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_FileSize" }    
+                    $pfilesize.Value = $filesize.toString()
+                    if ($null -eq $magic) {
+                        $dimensions = identify -ping -format "%w x %h" $jpg.FullName
+                    }
+                    else {
+                        $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+                        $pinfo.FileName = "$magic"
+                        $pinfo.RedirectStandardError = $true
+                        $pinfo.RedirectStandardOutput = $true
+                        $pinfo.UseShellExecute = $false
+                        $pinfo.Arguments = "identify -verbose -ping -format `"%w x %h`" $jpg"
+                        $p = New-Object System.Diagnostics.Process
+                        $p.StartInfo = $pinfo
+                        $p.Start() | Out-Null
+                        $p.WaitForExit()
+                        $dimensions = $p.StandardOutput.ReadToEnd()
+                        $stderr = $p.StandardError.ReadToEnd()
+                        Write-Host "stdout: $dimensions"
+                        Write-Host "stderr: $stderr"
+                        Write-Host "exit code: " + $p.ExitCode
+                        Write-log -Message "magick identify output: $dimensions $stderr" -logFile $logFile 
+                    }
+                    $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
+                    if ($null -ne $pdimensions) {
+                        $pdimensions.Value = $dimensions.Replace(" ", "")
+                    }
+
+                    $xml.Save($adifile.fullname)
                 }
                 else {
-                    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-                    $pinfo.FileName = "$magic"
-                    $pinfo.RedirectStandardError = $true
-                    $pinfo.RedirectStandardOutput = $true
-                    $pinfo.UseShellExecute = $false
-                    $pinfo.Arguments = "convert -verbose $bmppath $jpgpath"
-                    $p = New-Object System.Diagnostics.Process
-                    $p.StartInfo = $pinfo
-                    $p.Start() | Out-Null
-                    $p.WaitForExit()
-                    $stdout = $p.StandardOutput.ReadToEnd()
-                    $stderr = $p.StandardError.ReadToEnd()
-                    Write-Host "stdout: $stdout"
-                    Write-Host "stderr: $stderr"
-                    Write-Host "exit code: " + $p.ExitCode
-                    Write-log -Message "magick convert output: $stdout $stderr" -logFile $logFile 
+                    Write-Host Asset Poster image $bmppath was not found!
+                    Write-log -Message "$adifile.fullname Asset Poster image $bmppath was not found!" -logFile $logFile 
+                    $dt =  (Get-Date)
+                    Set-Content -Path ($adifile.DirectoryName + "/wfm-preprocessor.failure") -Value  "$dt - ERROR poster file $bmppath was not found in asset folder"
                 }
-
-
-                if (Test-Path $jpgpath) {
-                    $jpg = get-item $jpgpath
-                    $md5 = (Get-FileHash -Algorithm MD5 $jpg.FullName).hash
-                    $filesize = $jpg.Length
-                }
-                $passetname.value = $jpg.name
-                $pchecksum = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_CheckSum" }
-                $pchecksum.Value = $md5
-                $pfilesize = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Content_FileSize" }    
-                $pfilesize.Value = $filesize.toString()
-                if ($null -eq $magic) {
-                    $dimensions = identify -ping -format "%w x %h" $jpg.FullName
-                }
-                else {
-                    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-                    $pinfo.FileName = "$magic"
-                    $pinfo.RedirectStandardError = $true
-                    $pinfo.RedirectStandardOutput = $true
-                    $pinfo.UseShellExecute = $false
-                    $pinfo.Arguments = "identify -verbose -ping -format `"%w x %h`" $jpg"
-                    $p = New-Object System.Diagnostics.Process
-                    $p.StartInfo = $pinfo
-                    $p.Start() | Out-Null
-                    $p.WaitForExit()
-                    $dimensions = $p.StandardOutput.ReadToEnd()
-                    $stderr = $p.StandardError.ReadToEnd()
-                    Write-Host "stdout: $dimensions"
-                    Write-Host "stderr: $stderr"
-                    Write-Host "exit code: " + $p.ExitCode
-                    Write-log -Message "magick identify output: $dimensions $stderr" -logFile $logFile 
-                }
-                $pdimensions = $xml.SelectNodes("//AMS[@Asset_Class='poster']").ParentNode.App_Data | Where { $_.Name -eq "Image_Aspect_Ratio" }    
-                if ($null -ne $pdimensions)
-                {
-                    $pdimensions.Value = $dimensions.Replace(" ", "")
-                }
-
-                $xml.Save($adifile.fullname)
             }
             else {
                 Write-Host Asset $adifile.fullname did not have a poster node with a .bmp
