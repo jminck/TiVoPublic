@@ -695,3 +695,82 @@ function Convert-PosterBmpToJpg {
     
     } 
 } # end function
+
+
+function Repair-ADIErrors {
+    <#
+.Synopsis
+  The short function description.
+.Description
+	The long function description
+.Example
+	C:\PS>Function-Name -param "Param Value"
+	
+	This example does something
+.Example
+	C:\PS>
+    
+	You can have multiple examples
+.Notes
+	Name: Function-Name
+	Author: Author Name
+	Last Edit: Date
+	Keywords: Any keywords
+.Inputs
+	None
+.Outputs
+	None
+#Requires -Version 2.0
+#>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI xml object")]
+        [System.Xml.XmlDocument]$xml,
+
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI file to process")]
+        [System.IO.FileInfo]$adifile
+
+    )
+    process {
+        try {
+            if (!(test-path ($adifile.directoryname + "/.deleteready")) -and (test-path ($adifile.DirectoryName + "/" + $adifile.BaseName + ".wfmready")) )
+            {
+      
+                    #remove extra violence advisries
+                    $v_advisories = $xml.ADI.Asset.Metadata.App_Data | Where-Object {$_.Name -eq "Advisories" -and $_.value -like "*V*"}
+                    if ($v_advisories.count -gt 1)
+                    {
+                        Write-Log -Message "Found multiple violence advisories" -logFile $logFilea
+                        for ($i=1;$i -lt $v_advisories.count;$i++)
+                        {
+                            $v = $v_advisories[$i]
+                            Write-Log -Message "removing advistory $v.value" -logFile $logFile
+                            $v.ParentNode.RemoveChild($v)
+                        }
+                    }
+    
+                    #remove trailing spaces in category names
+                    $categories = $xml.ADI.Asset.Metadata.App_Data | Where-Object {$_.Name -eq "Category" }
+                    foreach ($c in $categories)
+                    {
+                        Write-Log -Message "checking $c.value for trailing spaces" -logFile $logFile
+                        $c_newvalue = $c.value.replace(" /","/")
+                        if ($c.value -ne $c_newvalue)
+                        {
+                             $c.value = $c_newvalue
+                        }
+                    }
+                
+            }
+            else {
+                Write-Log -Message ".deleteready found in folder, or missing .wfmready, skipping $adifile" -logFile $logFile
+            }     
+        }
+        catch {
+            Write-Host $PSItem.InvocationInfo
+            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
+        }
+    }
+} #End function

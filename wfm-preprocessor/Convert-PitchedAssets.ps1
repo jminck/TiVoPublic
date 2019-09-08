@@ -44,6 +44,7 @@ foreach ($adifile in $adifiles) {
             # copy Suggested_Price into Gross_price and Net_price (change logic for proper values per requirements if Gross/Net price are different than Suggested_Price )
             $suggestedprice = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Suggested_Price']").value
             $isSvod = Add-SvodPackage -Xml $xml -grossprice $suggestedprice -packages $packages 
+            Repair-ADIErrors -Xml $xml -adifile $adifile
             $xml.Save($adifile.fullname)
             $xml = [xml](Get-Content $adifile.FullName)
             if ($null -eq $isSvod)
