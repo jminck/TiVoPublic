@@ -29,11 +29,13 @@ Set-Location $ScriptDir
 # load helper functions
 . ./PreprocessorFunctions.ps1
 
+$catcherpath = "/assets/catcher/delete-test/"
+
 $logFile = "./removeingestedassetsfromcatcher-" + (Get-Date -Format yyyy-MM-dd) + ".log"
-$deletemarkers = Get-ChildItem -Recurse "/assets/Armstrong/delete-test/" -Include *.deleteready 
+$deletemarkers = Get-ChildItem -Recurse $catcherpath -Include *.deleteready 
 # if null, try again with hidden attribute
 if ($null -eq $deletemarkers) {
-    $deletemarkers = Get-ChildItem -Recurse "/assets/Armstrong/delete-test/" -Include *.deleteready  -Attributes Hidden
+    $deletemarkers = Get-ChildItem -Recurse $catcherpath -Include *.deleteready  -Attributes Hidden
 }
 Write-Log -Message "Completed assets found: $deletemarkers.Count" -logFile $logFile
 $delayhours = 48
@@ -52,3 +54,24 @@ foreach ($marker in $deletemarkers)
         Write-Log -Message "$marker is $timediff hours old, less than minimum of $delayhours to remove, skipping folder" -logFile $logFile
     }
 }
+
+Write-Log -Message "** looking for folders with failed pitches **" -logFile $logFile
+
+$catcher = Get-ChildItem $catcherpath -recurse | Where-Object { $_.PSIsContainer } 
+foreach ($subdir in $catcher) 
+{
+    write-host checking $subdir
+     if (((Get-ChildItem $subdir -Filter *.xml).count) -eq 0)
+        {
+            if (((Get-Date) - $subdir.LastWriteTime).TotalHours -lt $delayhours)
+            {
+                write-host "Not removing incomplete folder $subdir, not older than $delayhours, "
+                Write-Log -Message "Not removing incomplete folder $subdir, not older than $delayhours" -logFile $logFile
+            } else {
+                write-host "Removing incomplete folder $subdir"
+                Write-Log -Message "Removing incomplete folder $subdir" -logFile $logFile
+                #Delete the folder  
+                #Remove-Item $subdir -Force -Recurse
+            }
+        }
+} 
