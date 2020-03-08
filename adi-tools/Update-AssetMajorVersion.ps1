@@ -4,9 +4,7 @@
     .SYNOPSIS
         This script is an example VOD preprocessor step prior to WFM ingest
     .DESCRIPTION
-        Convert-PitchedAssets recurses through a VOD catcher share and adds TiVo VOD required ADI extensions
-        to the asset metadata, as well as renaming the ADI file and its parent folder into the convention
-        required by TiVO VOD
+ 
 #>
 
 $script = $script:MyInvocation.MyCommand.name

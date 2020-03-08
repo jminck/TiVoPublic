@@ -62,7 +62,6 @@ foreach ($adifile in $adifiles) {
         $newfile = ($newfolder + "/" + $adifile.Name)
         Write-Host $newfile
         $xml.Save($newfile)
-        start-sleep -Milliseconds 100     
         Write-Host --------- 
     }
 }
