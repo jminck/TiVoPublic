@@ -32,6 +32,35 @@ $folder = $outputpath
 Write-Host calling ./Set-FileAndFolderName.ps1
 ./Set-FileAndFolderName.ps1
 
+# When Calling sort functions, call least specific (type, rating) before more specific (series)
+
+########
+# Sort-AssetsByType.ps1
+# This script sorts the folder structure of assets by type (ZVOD/SVOD/TVOD) based on information in the ADI file
+# Relies on:
+# $logFile (optional - will default to default name)
+# $folder 
+Write-Host calling ./Sort-AssetsByType.ps1
+./Sort-AssetsByType.ps1
+
+########
+# Sort-AssetsByRating.ps1
+# This script sorts the folder structure of assets by Rating
+# Relies on:
+# $logFile (optional - will default to default name)
+# $folder 
+# Write-Host calling ./Sort-AssetsByRating.ps1
+# ./Sort-AssetsByRating.ps1
+
+########
+# Sort-AssetsBySeries.ps1
+# This script (attempts to) sort the folder structure of assets by series
+# Relies on:
+# $logFile (optional - will default to default name)
+# $folder 
+Write-Host calling ./Sort-AssetsBySeries.ps1
+./Sort-AssetsBySeries.ps1
+
 ########
 # Set-SampleMediaAssets.ps1
 # This script updates the movie, preview and poster assets in the ADI file with hardcoded values from a sample public domain movie
@@ -91,6 +120,7 @@ Write-Host calling ./Add-SvodPackage.ps1
 # $logFile (optional - will default to default name)
 # $folder 
 # $addcategory $true by default
+$folder = "/assets/scratch/test/out_v1/TVOD/NCIS"
 Write-Host calling ./Add-OutOfHomeRestrictions.ps1
 ./Add-OutOfHomeRestrictions.ps1
 
@@ -101,6 +131,7 @@ Write-Host calling ./Add-OutOfHomeRestrictions.ps1
 # $logFile (optional - will default to default name)
 # $folder 
 # $addcategory $true by default
+$folder = "/assets/scratch/test/out_v1/TVOD/Twin Peaks"
 Write-Host calling ./Add-TrickPlayRestrictions.ps1
 ./Add-TrickPlayRestrictions.ps1
 
@@ -113,37 +144,12 @@ Write-Host calling ./Add-TrickPlayRestrictions.ps1
 # $folder 
 # $addcategory $true by default
 # $attribute - (optional) set if you want to pull an attribute from title node of the ADI file, like Rating 
+$folder = "/assets/scratch/test/out_v1"
 $testcategory = "TiVo/ByRating"
 $attribute = "Rating"
 Write-Host calling ./Add-TivoCategory.ps1
 ./Add-TivoCategory.ps1
 
-# When Calling sort functions, call least specific (type, rating) before more specific (series)
-
-########
-# Sort-AssetsByType.ps1
-# This script sorts the folder structure of assets by type (ZVOD/SVOD/TVOD) based on information in the ADI file
-# Relies on:
-# $logFile (optional - will default to default name)
-# $folder 
-Write-Host calling ./Sort-AssetsByType.ps1
-./Sort-AssetsByType.ps1
-
-########
-# Sort-AssetsByRating.ps1
-# This script sorts the folder structure of assets by Rating
-# Relies on:
-# $logFile (optional - will default to default name)
-# $folder 
-Write-Host calling ./Sort-AssetsByRating.ps1
-./Sort-AssetsByRating.ps1
-
-########
-# Relies on:
-# $logFile (optional - will default to default name)
-# $folder 
-Write-Host calling ./Sort-AssetsBySeries.ps1
-./Sort-AssetsBySeries.ps1
 
 ########
 # Add-WfmReadyFile.ps1
