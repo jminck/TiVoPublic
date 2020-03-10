@@ -1,4 +1,4 @@
 .DS_Store
 *.log
 *.csv
-adi-tools/0-*.ps1
+adi-tools/0*.ps1
