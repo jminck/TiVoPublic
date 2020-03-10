@@ -15,7 +15,7 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$inputpath = "/assets/catcher/vp11/redo" #folder to update
+$inputpath = "/mount/catcher/vp7/cleanup" #folder to update
 $outputpath = "$inputpath/DELETE"
 
 # load helper functions
