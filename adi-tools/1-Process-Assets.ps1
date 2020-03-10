@@ -1,5 +1,5 @@
 #
-# This is a wrapper around other scripts to drive an asset processing workflow
+# This is a wrapper around other scripts to drive an asset processing workflow.
 #
 
 # $runall is a global to set $confirmation = "a" in each script to run every step without prompts
