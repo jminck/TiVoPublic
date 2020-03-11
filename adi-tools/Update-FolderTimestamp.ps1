@@ -12,7 +12,7 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folderpath = "/assets/catcher/vp11/redo2" #folder to update
+$folderpath = "/mount/catcher/vp7/TiVO-POLAND" #folder to update
 
 # load helper functions
 . .\AdiPrepFunctions.ps1
