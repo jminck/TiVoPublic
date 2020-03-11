@@ -33,9 +33,9 @@ foreach ($adifile in $adifiles)
             $xml = [xml](Get-Content $adifile)
 
             #rev version number
-            [int]$version = $xml.ADI.Metadata.AMS.Version_Major
+            [int]$version = $xml.SelectNodes("//AMS[@Asset_Class='title']").Version_Major
             $version++
-            $props = $xml.SelectNodes("//AMS") 
+            $props = $xml.SelectNodes("//AMS[@Asset_Class='title']")
             foreach ($vmaj in $props) {$vmaj.SetAttribute("Version_Major",$version)}
             $xml.Save($adifile)
             $assetid = $xml.SelectNodes("//AMS[@Asset_Class='title']").Asset_ID
