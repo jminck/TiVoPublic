@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp11/Adult-SVOD" #folder to update
+    $folder = "/mount/catcher/vp11/DELETE" #folder to update
 }
 
 # load helper functions

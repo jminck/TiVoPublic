@@ -12,7 +12,7 @@ $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folder = "/mount/catcher/vp11/v3/networks/BuenaVista"
+$folder = "/mount/catcher/vp11/v3/adult"
 
 # load helper functions
 . .\AdiPrepFunctions.ps1

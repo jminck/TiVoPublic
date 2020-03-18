@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/tmp/assets/out/vp11/TVOD"
+    $folder = "/mount/catcher/vp11/v3/adult"
 }
 if ($null -eq $addcategory)
 {

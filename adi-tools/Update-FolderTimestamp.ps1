@@ -12,14 +12,14 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folderpath = "/mount/catcher/vp7/TiVO-POLAND" #folder to update
+$folder = "/mount/catcher/vp11/v3/USA-BRAVO-cleanup_v2" #folder to update
 
 # load helper functions
 . .\AdiPrepFunctions.ps1
 
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
 Write-Log -Message $script -logFile $logFile
-$adifiles = Get-ChildItem -Recurse $folderpath  -Filter *.xml -exclude done/*
+$adifiles = Get-ChildItem -Recurse $folder  -Filter *.xml -exclude done/*
 $c = 0
 $confirmation = "a"
 Write-host file coount $adifiles.count
