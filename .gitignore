@@ -1,8 +1,4 @@
 .DS_Store
 *.log
 *.csv
-<<<<<<< HEAD
 adi-tools/0*.ps1
-=======
-adi-tools/0*.ps1
->>>>>>> 910237e4a7b009156fcd8ea92a398cae96503408
