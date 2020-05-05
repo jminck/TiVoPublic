@@ -10,15 +10,23 @@ $script = $script:MyInvocation.MyCommand.name
 $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-$logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
-
-$folder = "/tmp/assets/NOTYPE" #folder to update
-
+if ($null -eq $logFile)
+{
+    $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
+}
+if ($null -eq $folder)
+{
+    $folder = "/tmp/assets/out/vp11/TVOD"
+}
 # load helper functions
 . .\AdiPrepFunctions.ps1
 
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
 Write-Log -Message $script -logFile $logFile
+Write-Host working with folder $folder logging to $logfile
+Write-Log -Message "ADI files found: $adifiles" -logFile $logFile
+if ($runall -eq $true){$confirmation = "a"} else{ $confirmation = $null}
+
 $adifiles = Get-ChildItem -Recurse $folder -Filter *.xml
 $c = 0
 Write-Host working with folder $folder

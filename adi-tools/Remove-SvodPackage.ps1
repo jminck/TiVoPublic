@@ -10,11 +10,14 @@ $script = $script:MyInvocation.MyCommand.name
 $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-$logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
-
-$folder = "/tmp/assets/NOTYPE" #folder to update
-$removecategory = $true
-
+if ($null -eq $logFile)
+{
+    $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
+}
+if ($null -eq $folder)
+{
+    $folder = "/tmp/assets/out/vp11/TVOD"
+}
 # load helper functions
 . .\AdiPrepFunctions.ps1
 

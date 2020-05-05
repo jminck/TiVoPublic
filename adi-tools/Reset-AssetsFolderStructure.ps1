@@ -16,11 +16,11 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/scratch/test/out_v1" #folder to update
+    $folder = "/assets/vp13/out_v1" #folder to update
 }
 if ($null -eq $resetfolder)
 {
-    $resetfolder = "/assets/scratch/test/out_v2" 
+    $resetfolder = "/assets/vp13/out_v2" 
 }
 
 # load helper functions

@@ -800,6 +800,77 @@ function Sort-AssetsByCategory {
     }
 } #End function
 
+
+function Sort-AssetsByCategoryV2 {
+    <#
+    .Synopsis
+      The short function description.
+    .Description
+        The long function description
+    .Example
+        C:\PS>Function-Name -param "Param Value"
+        
+        This example does something
+    .Example
+        C:\PS>
+        
+        You can have multiple examples
+    .Notes
+        Name: Function-Name
+        Author: Author Name
+        Last Edit: Date
+        Keywords: Any keywords
+    .Inputs
+        None
+    .Outputs
+        None
+    #Requires -Version 2.0
+    #>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI xml object")]
+        [System.Xml.XmlDocument]$xml,
+    
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI file to process")]
+        [System.IO.FileInfo]$adifile
+    
+    )
+    process {
+        try {
+            write-host "processing $adifile"
+            Write-Log -Message "processing $adifile"  -logFile $logFile
+ 
+            $element = "Category"
+            $cat = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='$element']")[0].value
+            Write-Host $element - $cat
+
+            if ($cat) {
+                if ($adifile.DirectoryName -Match $cat) {
+                    Write-Log -Message "$adifile.DirectoryName already contains $cat"  -logFile $logFile
+                }
+                else {
+                    $pattern = '[^a-zA-Z0-9/]'
+                    $cat = $cat -replace $pattern, '' 
+                    $outfolder = (get-item $adifile.DirectoryName).parent.fullname + "/" + $cat.ToLower()
+                    if (!(Test-Path $outfolder)) 
+                    { New-Item -ItemType "directory" -Path $outfolder -Force}
+                    move-item $adifile.Directory $outfolder
+                    Get-ChildItem $outfolder
+                }
+                    
+            }
+
+  
+        }
+        catch {
+            Write-Host $PSItem.InvocationInfo
+            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
+        }
+    }
+} #End function
+
 function Add-SvodPackage {
     <#
 .Synopsis

@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp11/Adult-SVOD" #folder to update
+    $folder = "/assets/vp13/out_v1" #folder to update
 }
 
 # load helper functions
@@ -37,7 +37,7 @@ foreach ($adifile in $adifiles) {
         $c += 1
         Write-Host working with file $c - $adifile.FullName
         $xml = [xml](Get-Content $adifile.FullName)
-        Sort-AssetsByCategory -xml $xml -adifile $adifile
+        Sort-AssetsByCategoryV2 -xml $xml -adifile $adifile
     }
 }
 
