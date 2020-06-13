@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp13/in"
+    $folder = "/Users/jminckler/OneDrive/TiVo/Armstrong/wfmlogs/adi/home/deploy/adi"
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
@@ -38,6 +38,16 @@ foreach ($adifile in $adifiles)
         $xml = [xml](Get-Content $adifile.FullName)
 
         $element = "Asset_ID"
+        $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
+        Write-Host $element - $v
+        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
+
+        $element = "Provider"
+        $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
+        Write-Host $element - $v
+        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
+
+        $element = "Provider_ID"
         $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
