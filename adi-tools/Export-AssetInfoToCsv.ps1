@@ -16,11 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-<<<<<<< HEAD
     $folder = "/mount/catcher/vp19/v1"
-=======
-    $folder = "/Users/jminckler/OneDrive/TiVo/Armstrong/wfmlogs/adi/home/deploy/adi"
->>>>>>> 95feefa8682b02aa793468ef591a967f76855783
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
@@ -46,7 +42,6 @@ foreach ($adifile in $adifiles)
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
 
-<<<<<<< HEAD
         $element = "Provider_ID"
         $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
         Write-Host $element - $v
@@ -56,17 +51,6 @@ foreach ($adifile in $adifiles)
         $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v                
-=======
-        $element = "Provider"
-        $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
-        Write-Host $element - $v
-        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
-
-        $element = "Provider_ID"
-        $v = $xml.SelectNodes("//AMS[@Asset_Class='title']").$element
-        Write-Host $element - $v
-        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
->>>>>>> 95feefa8682b02aa793468ef591a967f76855783
 
         $element = "Title"
         $v = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='$element']").value
