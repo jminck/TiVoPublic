@@ -12,7 +12,7 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folder = "/mount/catcher/vp11/v3/USA-BRAVO-cleanup_v2" #folder to update
+$folder = "/assets/vp19/v1/out/adult" #folder to update
 
 # load helper functions
 . .\AdiPrepFunctions.ps1
@@ -25,6 +25,11 @@ $confirmation = "a"
 Write-host file coount $adifiles.count
 foreach ($adifile in $adifiles) {
     write-host "processing $adifile"
+    if (test-path ($adifile.DirectoryName + "/.deleteready"))
+    {
+        write-host "$adifile already ingested, skipping"
+        continue
+    }
     if ($confirmation -ne "a") {
         $confirmation = Read-Host "Are you Sure You Want To Proceed: ((y)es/(n)o/(a)ll)"
     }

@@ -15,7 +15,7 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$inputpath = "/mount/catcher/vp11/DELETE_v2/USA-BRAVO-cleanup_v2" #folder to update
+$inputpath = "/mount/catcher/vp19/v0.1" #folder to update
 $outputpath = "$inputpath/DELETE"
 
 # load helper functions

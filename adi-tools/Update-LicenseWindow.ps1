@@ -22,7 +22,7 @@ if ($null -eq $increment)
 }
 if ($null -eq $folder)
 {
-    $folder = "/tmp/assets/out/vp11/TVOD"
+    $folder = "/assets/vp19/v1/out/shortDuration"
 }
 if ($null -eq $addcategory)
 {
@@ -34,7 +34,7 @@ if ($null -eq $licensestart)
 }
 if ($null -eq $licenseend)
 {
-    $licenseend = "2030-01-01T00:00:00"
+    $licenseend = "2020-08-10T00:00:00"
 }
 
 # load helper functions

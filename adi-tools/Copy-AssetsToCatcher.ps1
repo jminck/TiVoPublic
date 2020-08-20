@@ -1,5 +1,5 @@
-$sourcefolder = "/mount/catcher/vp11/v3/USA-BRAVO-cleanup"
-$catcher = "/mount/catcher/vp11/v3/USA-BRAVO-cleanup_v2"
+$sourcefolder = "/assets/vp19/v1/out/adult"
+$catcher = "/mount/catcher/vp19/v1"
 $assetfolder = "/mount/catcher/vp11/v3/General_Media/*"
 dir $sourcefolder/*wfmready -Recurse | remove-item
 $i = 0
@@ -14,16 +14,17 @@ foreach ($asset in $assetfolders)
         new-item $destpath -ItemType Directory
         Copy-Item (dir $asset.directoryname) $destpath -Recurse
         Copy-Item $assetfolder ($catcher.tostring() + "/" + $asset.Directory.BaseName.ToString()) -verbose
-        $readyfile = $catcher + "/" + $asset.basename +"/" + $asset.Name.replace("xml","wfmready")
-        write-host $readyfile
-        new-Item $readyfile -ItemType File
+        $readyfile = $catcher + "/" + $asset.basename +"/" + $asset.Name.replace("xml","wfmready")       
         }
         else {
             {write-host $destpath already exists}
         }
         $readyfile = $destpath + "/" + $asset.basename + ".wfmready"
-        write-host $readyfile
-
+        if (!(Test-Path $readyfile))
+        {
+            new-Item $readyfile -ItemType File 
+        }
+        dir $readyfile
         $i++
-        if ($i -gt 50) {break}
+        if ($i -ge 500) {break}
     }
