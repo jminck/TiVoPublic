@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp19/v1"
+    $folder = "/mount/catcher/vp12/v1"
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
