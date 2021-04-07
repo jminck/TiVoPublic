@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp12/v1"
+    $folder = "/mount/catcher/vp15/complexoffers/"
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
@@ -163,6 +163,10 @@ foreach ($adifile in $adifiles)
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
 
+        $element = "Maximum_Viewing_Length"
+        $v = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='$element']").value
+        Write-Host $element - $v
+        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
         $element = "AssetFolder"
         $v = $adifile.DirectoryName
         Write-Host $element - $v
