@@ -21,7 +21,7 @@ if ($null -eq $folder)
 if ($null -eq $addcategory)
 {
     $addcategory = $true
-}
+} 
 if ($null -eq $devicetype)
 {
     $devicetype = "STB"
