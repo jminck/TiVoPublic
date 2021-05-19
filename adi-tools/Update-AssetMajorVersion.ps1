@@ -12,7 +12,7 @@ $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folder = "/mount/catcher/vp11/DELETE_v2/USA-BRAVO-cleanup_v2"
+$folder = "/mount/catcher/vp12/v3/complexoffers"
 
 # load helper functions
 . .\AdiPrepFunctions.ps1

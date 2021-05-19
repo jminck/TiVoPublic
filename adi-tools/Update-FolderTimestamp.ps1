@@ -12,7 +12,7 @@ Set-Location $ScriptDir
 
 $logFile = ".\adiprep_$script" + (Get-Date -Format yyyy-MM-dd) + ".log"
 
-$folder = "/assets/vp19/v1/out/adult" #folder to update
+$folder = "/mount/catcher/vp12/v3/2160p" #folder to update
 
 # load helper functions
 . .\AdiPrepFunctions.ps1

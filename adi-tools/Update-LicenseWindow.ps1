@@ -22,7 +22,7 @@ if ($null -eq $increment)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp19/v1/out/shortDuration"
+    $folder = "/mount/catcher/vp12/v2/ShortDuration"
 }
 if ($null -eq $addcategory)
 {
@@ -30,20 +30,21 @@ if ($null -eq $addcategory)
 }
 if ($null -eq $licensestart)
 {
-    $licensestart = "2020-01-01T00:00:00"
+    $licensestart = "2021-01-01T00:00:00"
 }
 if ($null -eq $licenseend)
 {
-    $licenseend = "2020-08-10T00:00:00"
+    $licenseend = "2021-05-23T00:00:00"
 }
-
+Write-host "licensestart - $licensestart"
+Write-host "licenseend - $licenseend"
 # load helper functions
 . .\AdiPrepFunctions.ps1
 
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
 Write-Log -Message $script -logFile $logFile
 $adifiles = Get-ChildItem -Recurse $folder -Filter *.xml
-$skip = 0 #initialize
+$skip = 1 #initialize
 if ($runall -eq $true){$confirmation = "a"} else{ $confirmation = $null} #initilize
 
 foreach ($adifile in $adifiles) {
