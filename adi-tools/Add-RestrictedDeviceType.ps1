@@ -16,16 +16,10 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp11/v3/adult"
+    $folder = "/assets/vp12/v1/out/ShortDuration/SVOD/super-svod/news/cnn/anthybourdain/anthybourdain/CNNX2009051900081337-20200827T155051Z"
 }
-if ($null -eq $addcategory)
-{
-    $addcategory = $true
-} 
-if ($null -eq $devicetype)
-{
-    $devicetype = "STB"
-}
+
+
 
 # load helper functions
 . .\AdiPrepFunctions.ps1
@@ -44,8 +38,9 @@ foreach ($adifile in $adifiles) {
         $c += 1
         Write-Host working with file $c - $adifile.FullName
         $xml = [xml](Get-Content $adifile.FullName)
-        Add-RestrictedDeviceType -xml $xml -devicetype $devicetype 
-           
+        Add-RestrictedDeviceType -xml $xml -devicetype "WEB" 
+        Add-RestrictedDeviceType -xml $xml -devicetype "STB" 
+
         $xml.Save($adifile.fullname)
         $adifile.fullname
     }
