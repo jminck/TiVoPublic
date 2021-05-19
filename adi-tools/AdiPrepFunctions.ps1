@@ -959,7 +959,70 @@ function Add-SvodPackage {
     }
 } #End function
 
+function Add-RestrictedDeviceType {
+    <#
+.Synopsis
+  The short function description.
+.Description
+	The long function description
+.Example
+	C:\PS>Function-Name -param "Param Value"
+	
+	This example does something
+.Example
+	C:\PS>
+    
+	You can have multiple examples
+.Notes
+	Name: Function-Name
+	Author: Author Name
+	Last Edit: Date
+	Keywords: Any keywords
+.Inputs
+	None
+.Outputs
+	None
+#Requires -Version 2.0
+#>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter ADI xml object")]
+        [System.Xml.XmlDocument]$xml,
 
+
+        [Parameter(Mandatory = $true)]
+        [string]$devicetype 
+
+    )
+    process {
+        try {
+
+                # check for existing Restricted_Device_Types node
+                $dtype = $xml.SelectNodes("//App_Data") | Where-Object { $_.Name -match "Restricted_Device_Types" -and $_.Value -match $devicetype} 
+
+                if ((($dtype.count -eq 0 -or $null -eq $dtype ) -and $null -ne $devicetype)) {
+                    # add a new offer element
+                    Write-Log -Message "adding new node Restricted_Device_Types=$devicetype" -logFile $logFile
+                    [xml]$childnode = "<App_Data App='MOD' Name='Restricted_Device_Types' Value='" + $devicetype + "'/>"
+                    $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true))
+                }
+
+                else {
+                    $msg = "Add-RestrictedDeviceType - Restricted_Device_Types of type $devicetype already exists "
+                    Write-Host $msg
+                    Write-Log -Message $msg -logFile $logFile
+                }        
+                
+            
+        }
+        catch {
+            Write-Host $PSItem.InvocationInfo
+            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
+        }
+    }
+} #End function
 
 function Set-FileAndFolderName {
     <#
