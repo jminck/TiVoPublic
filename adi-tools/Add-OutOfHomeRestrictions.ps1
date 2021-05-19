@@ -22,7 +22,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/tmp/assets/out/vp11/TVOD"
+    $folder = "/assets/vp15/TVOD"
 }
 if ($null -eq $addcategory)
 {

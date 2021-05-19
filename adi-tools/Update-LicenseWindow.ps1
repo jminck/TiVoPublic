@@ -22,7 +22,7 @@ if ($null -eq $increment)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp15/v1/ShortDuration/"
+    $folder = "/mount/catcher/vp12/v2/ShortDuration"
 }
 if ($null -eq $addcategory)
 {
@@ -34,7 +34,7 @@ if ($null -eq $licensestart)
 }
 if ($null -eq $licenseend)
 {
-    $licenseend = "2021-01-25T00:00:00"
+    $licenseend = "2021-05-23T00:00:00"
 }
 Write-host "licensestart - $licensestart"
 Write-host "licenseend - $licenseend"

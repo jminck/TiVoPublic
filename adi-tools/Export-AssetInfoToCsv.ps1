@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp15/complexoffers/"
+    $folder = "/mount/catcher/vp12/v3"
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
@@ -148,7 +148,7 @@ foreach ($adifile in $adifiles)
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
 
-        $element = "Restricted_Location_Types"
+        $element = "Restricted_Location_Type"
         $v = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='$element']").value
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
@@ -171,6 +171,13 @@ foreach ($adifile in $adifiles)
         $v = $adifile.DirectoryName
         Write-Host $element - $v
         $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
+
+        $element = "AssetSubFolder"
+        $v = $adifile.FullName.Split("/")[4]
+        Write-Host $element - $v
+        $row | Add-Member -MemberType NoteProperty -Name "$element" -Value $v
+
+
 
         #create empty field, filled in later
         $element = "Dupe"

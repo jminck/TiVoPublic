@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp15/v1/"
+    $folder = "/mount/catcher/vp12/v3/"
 }
 
 # load helper functions
