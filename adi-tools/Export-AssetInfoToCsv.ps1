@@ -16,7 +16,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/mount/catcher/vp12/v1"
+    $folder = "/tmp/tvod/"
 }
 
 $outputfile = $folder + "/" + ($folder.replace("/",".") + "-assets-" + (Get-Date -Format yyyy-MM-dd-HH-mm-ss) + ".CSV").TrimStart(".")
@@ -190,7 +190,7 @@ for ($i = 0; $i -lt ($csvContents.Asset_ID.count - 1); $i++)
             write-host dupe: $csvContents[$i].Asset_ID 
             write-host  path: $csvContents[$i].AssetFolder
             write-host  path: $csvContents[$i+1].AssetFolder
-            $csvContents[$i].Dupe = "True"
+            #$csvContents[$i].Dupe = "True"
             $csvContents[$i+1].Dupe = "True"
         }
     }
