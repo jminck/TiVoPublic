@@ -16,11 +16,8 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-<<<<<<< HEAD
+
     $folder = "/mount/catcher/vp15/complexoffers/40"
-=======
-    $folder = "/Users/jminckler/OneDrive/TiVo/assets/vp15-complex-offers/arranged/multioffer"
->>>>>>> fd28faa824b6793057d649e073f233a9935f48be
 }
 if ($null -eq $addcategory)
 {
@@ -60,13 +57,10 @@ foreach ($adifile in $adifiles) {
                 if ($cat.value -match $testcategory) {
                     if ($null -ne $attribute)
                     {
-<<<<<<< HEAD
+
                         $window = $adifile.Directory.Parent.Parent.name + ":00:00"
                         write-host $window
-=======
-                        $window = "03:00:00"
-                        write-host $adifile.Directory.Parent.Parent.name
->>>>>>> fd28faa824b6793057d649e073f233a9935f48be
+
                         $rentalwindow = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Maximum_Viewing_Length']")
                         $rentalwindow[0].Value =  $window
                         $cat.value = "$testcategory/" + $window #update existing category

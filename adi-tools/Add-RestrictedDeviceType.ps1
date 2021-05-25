@@ -16,9 +16,18 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp12/v1/out/ShortDuration/SVOD/super-svod/news/cnn/anthybourdain/anthybourdain/CNNX2009051900081337-20200827T155051Z"
+    $folder = "/mount/catcher/vp15/deviceRestrictions"
 }
 
+if ($null -eq $addcategory)
+{
+    $addcategory = $true
+}
+
+if ($null -eq $devicetype)
+{
+    $devicetype = "WEB"
+}
 
 
 # load helper functions
@@ -38,8 +47,23 @@ foreach ($adifile in $adifiles) {
         $c += 1
         Write-Host working with file $c - $adifile.FullName
         $xml = [xml](Get-Content $adifile.FullName)
-        Add-RestrictedDeviceType -xml $xml -devicetype "WEB" 
-        Add-RestrictedDeviceType -xml $xml -devicetype "STB" 
+        Add-RestrictedDeviceType -xml $xml -devicetype $devicetype 
+
+        if ($addcategory) {
+            $cats = $xml.SelectNodes("//ADI/Asset/Metadata/App_Data[@Name='Category']")
+            $testcategory = "TiVo/DeviceRestrictions"
+            foreach ($cat in $cats) {
+                if ($cat.value -match $testcategory) {
+                    $cat.value = "$testcategory/$devicetype" #update existing category
+                    Write-Host $testcategory already exists, updating
+                    $update = $true
+                }
+            }
+            if ($update -ne $true) {
+                [xml]$childnode = "<App_Data App='MOD' Name='Category' Value='" + "$testcategory/$devicetype" + "'/>"
+                $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true))
+            }
+        }
 
         $xml.Save($adifile.fullname)
         $adifile.fullname

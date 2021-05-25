@@ -17,7 +17,7 @@ if ($null -eq $logFile)
 if ($null -eq $folder)
 {
 
-    $folder = "/mount/catcher/vp12/v3"
+    $folder = "/mount/catcher/vp15/ooh-svod"
 
 }
 

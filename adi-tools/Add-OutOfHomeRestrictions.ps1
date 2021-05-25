@@ -22,7 +22,7 @@ if ($null -eq $logFile)
 }
 if ($null -eq $folder)
 {
-    $folder = "/assets/vp15/TVOD"
+    $folder = "/assets/vp12/ooh"
 }
 if ($null -eq $addcategory)
 {
@@ -55,7 +55,7 @@ foreach ($adifile in $adifiles) {
         $trick = Get-Random $tricks
 
         if ($restrictions.count -eq 0) {
-            [xml]$childnode = "<App_Data App='MOD' Name='Restricted_Location_Types' Value='OUT_OF_HOME'/>"
+            [xml]$childnode = "<App_Data App='MOD' Name='Restricted_Location_Type' Value='OUT_OF_HOME'/>"
             $xml.SelectNodes("//AMS[@Asset_Class='title']").ParentNode.AppendChild($xml.ImportNode($childnode.App_Data, $true))
         }
         else {
