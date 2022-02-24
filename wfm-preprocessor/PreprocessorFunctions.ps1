@@ -499,6 +499,67 @@ function Skip-CurrentTransfers {
     }
 } #End function
 
+function Test-AssetFilePath {
+    <#
+        .Synopsis
+          The short function description.
+        .Description
+            The long function description
+        .Example
+            C:\PS>Function-Name -param "Param Value"
+            
+            This example does something
+        .Example
+            C:\PS>
+            
+            You can have multiple examples
+        .Notes
+            Name: Function-Name
+            Author: Author Name
+            Last Edit: Date
+            Keywords: Any keywords
+        .Inputs
+            $folder - folder to check for files with recent timestamps (currently copying files)
+        .Outputs
+            [bool]$recentFileWrite
+        #Requires -Version 2.0
+        #>
+    [CmdletBinding(SupportsShouldProcess = $False)]
+    param
+    (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter folder to check for missing asset files")]
+        [System.IO.DirectoryInfo]$folder
+    )
+    process {
+        try {
+            $files = Get-ChildItem $folder -Exclude *.xml, *.bak
+            [bool]$recentFileWrite = $false
+            $delay = -1
+            foreach ($file in $files) {
+                if ($file.LastWriteTime -ge (Get-Date).AddMinutes($delay)) {
+                    if ($file.Name -ne $adifile.Name) {
+                        #flag that file timestamps are too new to mark folder with .wfmready 
+                        $recentFileWrite = $true
+                        $timediff = ((Get-Date) - $file.LastWriteTime).TotalMinutes | ForEach-Object { $_.ToString("#.#") }
+                        Write-Log -Message "Test-AssetFilePath - $file last write minutes ago: $timediff " -logFile $logFile
+                        Write-Host ""
+                    }
+                }
+            }
+
+            if ($recentFileWrite -eq $false) {
+                Write-Log -Message "Test-AssetFilePath - Folder doesn't appear to be currently copying files" -logFile $logFile
+            }
+            return $recentFileWrite
+        }
+        catch {
+            Write-Host $PSItem.InvocationInfo
+            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-Log -Message $_.Exception.Message -Severity "Error" -logFile $logFile
+        }
+    }
+} #End function
+
 
 function Get-XMLFileCount {
     <#

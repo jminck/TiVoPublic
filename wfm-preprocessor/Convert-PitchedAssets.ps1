@@ -23,7 +23,8 @@ $catcher = $vars.var.catcher
 
 
 Write-Log -Message "|--------------Starting script--------------------|" -logFile $logFile
-Write-Log -Message "Using variables $vars" -logFile $logFile
+$msg = "Using variables " + ($vars.var | out-string)
+Write-Log -Message $msg -logFile $logFile
 
 # process ADI files
 $adifiles = Get-ChildItem -Recurse $catcher -Filter *.xml
@@ -33,8 +34,13 @@ foreach ($adifile in $adifiles) {
         Write-Host $adifile.DirectoryName already processed
     }
     else {
+        Write-Log -Message "############################################################################" -logFile $logFile
+        $msg = "working with folder: " + $adifile.DirectoryName
+        Write-Host $msg 
+        Write-Log -Message $msg  -logFile $logFile        
         $skip = (Skip-CurrentTransfers -folder $adifile.DirectoryName)
         if (!($skip[$skip.count - 1])) {
+
             Write-Log -Message "processing $adifile" -logFile $logFile
             # make a backup of the file
             Copy-Item $adifile.FullName ($adifile.fullname + "." + (get-date -Format yyyyMMdd) + "T" + (get-date -Format hhmmss) + ".BAK")
@@ -53,6 +59,47 @@ foreach ($adifile in $adifiles) {
                 $xml.Save($adifile.fullname)
                 $xml = [xml](Get-Content $adifile.FullName)            
             }
+            # ###### START workaround to remove media asset nodes when updates are pitched without media files
+            # content providers are incrmenting asset versions without pitching the media assets when pitching metadata updates
+            # workaround is to delete these nodes if the associated media file is not found in the asset's folder
+            #
+            # check for poster file in ADI, then see if the file exists in the folder
+            # if file doesn't exist in the asset's folder, delete the node from the ADI file so WFM doesn't try to process a non-existent media asset
+            $assettypes = @("poster","movie","preview")
+            foreach ($type in $assettypes)
+            {
+                Write-Host "checking ADI for media asset type: $type"
+                Write-Log -Message "checking ADI for media asset type: $type"  -logFile $logFile
+                $assetfilename = $xml.SelectNodes( "//AMS[@Asset_Class='" + $type + "']").ParentNode.ParentNode.Content.Value
+                if ($null -ne $assetfilename)
+                    {
+                        $msg = "media asset file name specified in ADI: $assetfilename"
+                        Write-Host $msg 
+                        Write-Log -Message $msg  -logFile $logFile
+                        $msg = "contents of asset folder:"
+                        Write-Host $msg 
+                        Write-Log -Message $msg  -logFile $logFile
+                        $msg = Get-ChildItem $adifile.DirectoryName | out-string
+                        Write-Host $msg 
+                        Write-Log -Message $msg  -logFile $logFile
+
+                        if ((Get-ChildItem $adifile.DirectoryName -Name $assetfilename).count -eq 0) {
+                            $msg =  "$assetfilename was not found in the folder " + $adifile.DirectoryName + ", removing from ADI"
+                            Write-Host $msg
+                            Write-Log -Message $msg  -logFile $logFile
+                            $mediaasset= $xml.SelectSingleNode( "//AMS[@Asset_Class='" + $type + "']")
+                            $mediaasset.ParentNode.ParentNode.ParentNode.RemoveChild($mediaasset.ParentNode.ParentNode)
+                            $xml.Save($adifile.fullname)    
+                        }
+                    }
+                else
+                    {
+                        $msg = "ADI did not have media asset of type $type defined, nothing to do"
+                        write-host $msg
+                        Write-Log -Message $msg  -logFile $logFile
+                    }
+            } 
+            # ###### END workaround to remove media asset nodes when updates are pitched without media files
             Convert-PosterBmpToJpg -Xml $xml -adifile $adifile
             $newFolder = Rename-AssetAndFolder -Xml $xml -adifile $adifile
             if(!(Test-Path ($adifile.DirectoryPath + "/wfm-preprocessor.failure")))
